@@ -4,12 +4,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function ProductDetailScreen() {
@@ -80,7 +80,7 @@ export default function ProductDetailScreen() {
 
         <View className="px-5 py-6 -mt-6 bg-white rounded-t-3xl shadow-sm h-full">
           <Text className="text-blue-600 font-bold uppercase text-xs mb-2">
-            {product.category || "Sản phẩm"}
+            {product.category?.name || "Sản phẩm"}
           </Text>
 
           <Text className="text-2xl font-bold text-gray-900 mb-2">

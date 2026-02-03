@@ -4,8 +4,9 @@ import { ENDPOINTS } from "@/src/services/api/endpoints";
 import { http } from "@/src/services/api/http";
 
 export const productService = {
-  getAllProducts() {
-    return http.get<ApiResponse<Product[]>>(ENDPOINTS.GET_PRODUCTS);
+  getAllProducts(page = 0, size = 20, sortBy = 'id', order = 'desc') {
+    const url = `${ENDPOINTS.GET_PRODUCTS}?page=${page}&size=${size}&sortBy=${sortBy}&order=${order}`;
+    return http.get<ApiResponse<any>>(url);
   },
 
   searchProducts(keyword: string) {

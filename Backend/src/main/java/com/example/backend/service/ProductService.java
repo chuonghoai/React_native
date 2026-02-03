@@ -22,11 +22,13 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public ApiResponse getAllProducts(int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size, Sort.by("id").descending());
+    public ApiResponse getAllProducts(int page, int size, String sortBy, String order) {
+        Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         Page<Product> productPage = productRepository.findAllWithCategory(pageable);
-
+        
         List<ProductListResponse> responseList = mapToDto(productPage.getContent());
 
         Map<String, Object> metadata = new HashMap<>();
@@ -35,9 +37,8 @@ public class ProductService {
         metadata.put("size", productPage.getSize());
         metadata.put("totalElements", productPage.getTotalElements());
         metadata.put("totalPages", productPage.getTotalPages());
-        metadata.put("last", productPage.isLast());
 
-        return ApiResponse.success("Lấy danh sách sản phẩm thành công", metadata);
+        return ApiResponse.success("Lấy danh sách thành công", metadata);
     }
 
     public ApiResponse getProductDetail(Long id) {

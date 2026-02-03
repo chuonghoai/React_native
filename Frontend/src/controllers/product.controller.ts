@@ -10,15 +10,16 @@ type ProductDetailResult =
   | { ok: false; message: string };
 
 export const productController = {
-  async getList(): Promise<ProductResult> {
+  async getList(page = 0, size = 20, sortBy = 'id', order = 'desc'): Promise<ProductResult> {
     try {
-      const res = await productService.getAllProducts();
+      const res = await productService.getAllProducts(page, size, sortBy, order);
       
       if (res.success && res.data) {
-        return { ok: true, data: res.data };
+        // console.log(res.data);
+        return { ok: true, data: res.data.content }; 
       }
       
-      return { ok: false, message: res.message || "Không tải được danh sách sản phẩm" };
+      return { ok: false, message: res.message || "Không tải được danh sách" };
     } catch (e: any) {
       return { ok: false, message: e.message || "Lỗi kết nối server" };
     }

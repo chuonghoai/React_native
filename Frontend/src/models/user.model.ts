@@ -1,3 +1,5 @@
+import { Category } from "./product.model";
+
 export type UserData = {
   id: number;
   email: string;
@@ -6,6 +8,7 @@ export type UserData = {
   role: string;
   phone?: string;
   avatarUrl?: string;
+  categories?: Category[]; 
 };
 
 export type UpdateProfileRequest = {

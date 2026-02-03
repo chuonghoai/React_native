@@ -27,14 +27,17 @@ public class ProductController {
     @GetMapping
     public ApiResponse getAllProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String order
     ) {
         try {
-            return productService.getAllProducts(page, size);
+            return productService.getAllProducts(page, size, sortBy, order); 
         } catch (Exception e) {
             return ApiResponse.error("Lỗi: " + e.getMessage());
         }
     }
+
     @GetMapping("/{id}")
     public ApiResponse getProductDetail(@PathVariable Long id) {
         try {

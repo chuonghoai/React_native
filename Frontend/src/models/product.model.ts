@@ -1,9 +1,14 @@
+export type Category = {
+  id: number;
+  name: string;
+};
+
 export type Product = {
   id: number;
   name: string;
   price: number;
   imageUrl: string;
-  category: string;
+  category: Category;
 };
 
 export type ProductDetail = {
@@ -13,5 +18,5 @@ export type ProductDetail = {
   imageUrl: string;
   description: string;
   quantity: number;
-  category: string;
+  category: Category;
 };
