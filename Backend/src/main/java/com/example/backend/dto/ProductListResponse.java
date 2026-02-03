@@ -1,5 +1,7 @@
 package com.example.backend.dto;
 
+import com.example.backend.entities.Category;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +16,5 @@ public class ProductListResponse {
     private String name;
     private Double price;
     private String imageUrl;
-    private String category;
+    private Category category;
 }

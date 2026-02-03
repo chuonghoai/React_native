@@ -2,7 +2,6 @@ package com.example.backend.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,35 +14,27 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "products")
+@Table(name = "order_items")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product {
+public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private Integer quantity; // Số lượng mua
 
     @Column(nullable = false)
-    private Double price;
+    private Double price; // Giá tại thời điểm mua
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @ManyToOne
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
-    @Column
-    private String imageUrl;
-    
-    @Column
-    private Long quantity;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "category_id",
-        nullable = false
-    )
-    private Category category;
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 }

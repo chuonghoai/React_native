@@ -1,5 +1,9 @@
 package com.example.backend.dto;
 
+import java.util.List;
+
+import com.example.backend.entities.Category;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,4 +21,5 @@ public class UserMeResponse {
     private String role;
     private String phone;
     private String avatarUrl;
+    private List<Category> categories;
 }

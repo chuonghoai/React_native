@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,9 @@ import com.example.backend.dto.UpdateProfileRequest;
 import com.example.backend.dto.UserDto;
 import com.example.backend.dto.UserMeResponse;
 import com.example.backend.dto.VerifyChangeEmailRequest;
+import com.example.backend.entities.Category;
 import com.example.backend.entities.User;
+import com.example.backend.repositories.CategoryRepository;
 import com.example.backend.repositories.UserRepository;
 
 
@@ -27,6 +30,7 @@ import com.example.backend.repositories.UserRepository;
 public class AuthService {
 
     @Autowired private UserRepository userRepository;
+    @Autowired private CategoryRepository categoryRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JwtUtil jwtUtil;
     @Autowired private JavaMailSender mailSender;
@@ -156,6 +160,8 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
 
+        List<Category> listCategories = categoryRepository.findAll();
+
         UserMeResponse userMe = UserMeResponse.builder()
             .id(user.getId())
             .email(user.getEmail())
@@ -164,6 +170,7 @@ public class AuthService {
             .role(user.getRole())
             .phone(user.getPhone())
             .avatarUrl(user.getAvatarUrl())
+            .categories(listCategories)
             .build();
 
         return ApiResponse.success("Lấy thông tin thành công", userMe);

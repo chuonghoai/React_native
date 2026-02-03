@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.ApiResponse;
@@ -24,14 +25,16 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public ApiResponse getAllProducts() {
+    public ApiResponse getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
         try {
-            return productService.getAllProducts();
+            return productService.getAllProducts(page, size);
         } catch (Exception e) {
             return ApiResponse.error("Lỗi: " + e.getMessage());
         }
     }
-
     @GetMapping("/{id}")
     public ApiResponse getProductDetail(@PathVariable Long id) {
         try {
@@ -65,6 +68,15 @@ public class ProductController {
             return productService.filterProducts(categories);
         } catch (Exception e) {
             return ApiResponse.error("Lỗi lọc: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/best-sellers")
+    public ApiResponse getBestSellers() {
+        try {
+            return productService.getTop10BestSellers();
+        } catch (Exception e) {
+            return ApiResponse.error("Lỗi: " + e.getMessage());
         }
     }
 }

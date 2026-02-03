@@ -1,9 +1,14 @@
 package com.example.backend.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.dto.ApiResponse;
@@ -17,20 +22,22 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public ApiResponse getAllProducts() {
-        List<Product> products = productRepository.findAll();
-        
-        List<ProductListResponse> responseList = products.stream()
-            .map(p -> ProductListResponse.builder()
-                .id(p.getId())
-                .name(p.getName())
-                .price(p.getPrice())
-                .imageUrl(p.getImageUrl())
-                .category(p.getCategory())
-                .build())
-            .collect(Collectors.toList());
+    public ApiResponse getAllProducts(int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-        return ApiResponse.success("Lấy danh sách sản phẩm thành công", responseList);
+        Page<Product> productPage = productRepository.findAllWithCategory(pageable);
+
+        List<ProductListResponse> responseList = mapToDto(productPage.getContent());
+
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("content", responseList);
+        metadata.put("page", productPage.getNumber());
+        metadata.put("size", productPage.getSize());
+        metadata.put("totalElements", productPage.getTotalElements());
+        metadata.put("totalPages", productPage.getTotalPages());
+        metadata.put("last", productPage.isLast());
+
+        return ApiResponse.success("Lấy danh sách sản phẩm thành công", metadata);
     }
 
     public ApiResponse getProductDetail(Long id) {
@@ -61,12 +68,20 @@ public class ProductService {
     }
 
     public ApiResponse searchProducts(String keyword) {
-        List<Product> products = productRepository.findByNameContainingIgnoreCaseOrCategoryContainingIgnoreCase(keyword, keyword);
+        List<Product> products = 
+            productRepository
+            .findByNameContainingIgnoreCaseOrCategory_NameContainingIgnoreCase(keyword, keyword);
         return ApiResponse.success("Tìm thấy " + products.size() + " kết quả", mapToDto(products));
     }
 
     public ApiResponse filterProducts(List<String> categories) {
-        List<Product> products = productRepository.findByCategoryIn(categories);
+        List<Product> products = productRepository.findByCategory_NameIn(categories);
         return ApiResponse.success("Lọc thành công", mapToDto(products));
+    }
+
+    public ApiResponse getTop10BestSellers() {
+        List<Product> products = productRepository.findTop10BestSellers(PageRequest.of(0, 10));
+        
+        return ApiResponse.success("Lấy top 10 bán chạy thành công", mapToDto(products));
     }
 }
