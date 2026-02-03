@@ -23,5 +23,9 @@ export const productService = {
   getProductDetail(id: number) {
     const url = `${ENDPOINTS.GET_PRODUCTS}/${id}`;
     return http.get<ApiResponse<ProductDetail>>(url);
+  },
+  
+  getBestSellers() {
+    return http.get<ApiResponse<any>>(ENDPOINTS.GET_BEST_SELLERS);
   }
 };

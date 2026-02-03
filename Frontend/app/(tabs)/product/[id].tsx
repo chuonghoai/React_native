@@ -105,11 +105,11 @@ export default function ProductDetailScreen() {
         </View>
       </ScrollView>
 
-      <View className="p-4 border-t border-gray-100 bg-white safe-bottom">
+      {/* <View className="p-4 border-t border-gray-100 bg-white safe-bottom">
         <TouchableOpacity className="bg-blue-600 w-full py-4 rounded-xl items-center shadow-lg shadow-blue-200">
           <Text className="text-white font-bold text-lg">Thêm vào giỏ hàng</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 }

@@ -32,6 +32,7 @@ const SORT_OPTIONS = [
 export default function HomeScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [bestSellers, setBestSellers] = useState<Product[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -67,7 +68,15 @@ export default function HomeScreen() {
       }
     }
 
+    fetchBestSellers();
     fetchProducts();
+  };
+
+  const fetchBestSellers = async () => {
+    const res = await productController.getBestSellers();
+    if (res.ok) {
+        setBestSellers(res.data);
+    }
   };
 
   const fetchProducts = async () => {
@@ -147,6 +156,33 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
+  const renderBestSellerItem = ({ item }: { item: Product }) => (
+    <TouchableOpacity 
+      activeOpacity={0.9}
+      onPress={() => router.push({ pathname: "/(tabs)/product/[id]", params: { id: item.id.toString() } })}
+      className="mr-4 w-40"
+    >
+      <View className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <View className="relative">
+             <Image
+              source={{ uri: item.imageUrl || "https://via.placeholder.com/150" }}
+              className="w-full h-32 bg-gray-200"
+              resizeMode="cover"
+            />
+            {/* Badge HOT */}
+            <View className="absolute top-2 left-2 bg-red-500 px-2 py-0.5 rounded">
+                <Text className="text-white text-[10px] font-bold">HOT</Text>
+            </View>
+        </View>
+        
+        <View className="p-3">
+          <Text className="text-sm font-bold text-gray-800 mb-1" numberOfLines={1}>{item.name}</Text>
+          <Text className="text-red-600 font-bold text-sm">{formatCurrency(item.price)}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <View className="flex-1 bg-gray-50 pt-4 relative">
       {/* Header Bar */}
@@ -212,8 +248,27 @@ export default function HomeScreen() {
         </TouchableWithoutFeedback>
       )}
 
+      {bestSellers.length > 0 && (
+          <View className="mb-4 pl-4">
+            <View className="flex-row items-center mb-3">
+                <Ionicons name="flame" size={20} color="orange" />
+                <Text className="text-lg font-bold text-gray-800 ml-1">Bán chạy nhất</Text>
+            </View>
+            
+            <FlatList 
+                horizontal
+                data={bestSellers}
+                renderItem={renderBestSellerItem}
+                keyExtractor={(item) => "best_" + item.id.toString()}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingRight: 20 }}
+            />
+          </View>
+      )}
+
       {/* Product List */}
       <View className="flex-1 px-4 z-0">
+        <Text className="text-lg font-bold text-gray-800 mb-3">Tất cả sản phẩm</Text>
         {loading ? (
            <ActivityIndicator size="large" color="#2563EB" className="mt-10" />
         ) : (

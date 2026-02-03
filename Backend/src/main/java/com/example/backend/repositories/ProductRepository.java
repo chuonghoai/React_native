@@ -16,7 +16,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM OrderItem oi JOIN oi.product p " +
            "GROUP BY p.id, p.name, p.price, p.imageUrl, p.description, p.quantity, p.category " +
            "ORDER BY SUM(oi.quantity) DESC")
-    List<Product> findTop10BestSellers(org.springframework.data.domain.Pageable pageable);
+    List<Product> findTop10BestSellers(Pageable pageable);
 
     @Query(
         value = "SELECT p FROM Product p JOIN FETCH p.category",

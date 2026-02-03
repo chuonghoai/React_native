@@ -57,5 +57,17 @@ export const productController = {
     } catch (e: any) {
       return { ok: false, message: e.message || "Lỗi kết nối server" };
     }
-  }
+  },
+
+  async getBestSellers(): Promise<ProductResult> {
+    try {
+      const res = await productService.getBestSellers();
+      if (res.success && res.data) {
+        return { ok: true, data: res.data }; 
+      }
+      return { ok: false, message: res.message || "Không tải được sản phẩm bán chạy" };
+    } catch (e: any) {
+      return { ok: false, message: e.message || "Lỗi kết nối" };
+    }
+  },
 };
