@@ -14,4 +14,5 @@ export const ENDPOINTS = {
   SEARCH_PRODUCTS: "/products/search", 
   FILTER_PRODUCTS: "/products/category",
   GET_BEST_SELLERS: "/products/best-sellers",
+  GET_DISCOUNT_PRODUCTS: "/vouchers"
 } as const;

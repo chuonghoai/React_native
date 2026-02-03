@@ -1,5 +1,6 @@
 package com.example.backend.repositories;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -23,4 +24,24 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         countQuery = "SELECT COUNT(p) FROM Product p"
     )
     Page<Product> findAllWithCategory(Pageable pageable);
+
+    @Query("SELECT p, SUM(v.discountAmount) " +
+           "FROM Product p JOIN p.vouchers v " +
+           "WHERE v.startDate <= :now AND v.endDate >= :now " +
+           "GROUP BY p")
+    Page<Object[]> findProductsWithTotalDiscount(LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT p, SUM(v.discountAmount) " +
+           "FROM Product p JOIN p.vouchers v " +
+           "WHERE v.startDate <= :now AND v.endDate >= :now " +
+           "GROUP BY p " +
+           "ORDER BY (p.price - SUM(v.discountAmount)) ASC")
+    Page<Object[]> findDiscountedProductsSortedByPriceAsc(LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT p, SUM(v.discountAmount) " +
+           "FROM Product p JOIN p.vouchers v " +
+           "WHERE v.startDate <= :now AND v.endDate >= :now " +
+           "GROUP BY p " +
+           "ORDER BY (p.price - SUM(v.discountAmount)) DESC")
+    Page<Object[]> findDiscountedProductsSortedByPriceDesc(LocalDateTime now, Pageable pageable);
 }

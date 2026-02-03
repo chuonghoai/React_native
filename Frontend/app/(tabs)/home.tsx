@@ -1,6 +1,8 @@
 import { homeController } from "@/src/controllers/home.controller"; // Import homeController để lấy data User
 import { productController } from "@/src/controllers/product.controller";
+import { voucherController } from "@/src/controllers/voucher.controller";
 import { Category, Product } from "@/src/models/product.model";
+import { ProductDiscount } from "@/src/models/voucher.model";
 import { userLocal } from "@/src/storage/user.local"; // Import storage
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -33,6 +35,7 @@ export default function HomeScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [bestSellers, setBestSellers] = useState<Product[]>([]);
+  const [discountProducts, setDiscountProducts] = useState<ProductDiscount[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -69,6 +72,7 @@ export default function HomeScreen() {
     }
 
     fetchBestSellers();
+    fetchDiscountProducts();
     fetchProducts();
   };
 
@@ -77,6 +81,13 @@ export default function HomeScreen() {
     if (res.ok) {
         setBestSellers(res.data);
     }
+  };
+
+  const fetchDiscountProducts = async () => {
+      const res = await voucherController.getList(0, 10);
+      if (res.ok) {
+          setDiscountProducts(res.data);
+      }
   };
 
   const fetchProducts = async () => {
@@ -183,6 +194,109 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
+  const renderDiscountItem = ({ item }: { item: ProductDiscount }) => (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={() =>
+        router.push({
+          pathname: "/(tabs)/product/[id]",
+          params: { id: item.id.toString() },
+        })
+      }
+      className="m-2"
+      style={{ flexBasis: '48%' }}
+    >
+      <View className="bg-white rounded-xl shadow-sm border border-red-100 overflow-hidden">
+        <View className="relative">
+          <Image
+            source={{ uri: item.imageUrl || "https://via.placeholder.com/150" }}
+            className="w-full h-40 bg-gray-200"
+            resizeMode="cover"
+          />
+
+          <View className="absolute top-0 right-0 bg-red-600 px-2 py-1 rounded-bl-lg">
+            <Text className="text-white text-[10px] font-bold">
+              Giảm {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(item.totalDiscountAmount)}
+            </Text>
+          </View>
+        </View>
+
+        <View className="p-3">
+          <Text
+            className="text-sm font-bold text-gray-800 mb-1"
+            numberOfLines={2}
+          >
+            {item.name}
+          </Text>
+
+          <Text className="text-red-600 font-bold text-sm">
+            {new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(item.priceAfterDiscount)}
+          </Text>
+
+          <Text className="text-gray-400 text-xs line-through mt-0.5">
+            {new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(item.price)}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderHeaderContent = () => (
+    <View>
+      {/* Best seller */}
+      {bestSellers.length > 0 && (
+          <View className="mb-4 pl-4">
+            <View className="flex-row items-center mb-3">
+                <Ionicons name="flame" size={20} color="orange" />
+                <Text className="text-lg font-bold text-gray-800 ml-1">Bán chạy nhất</Text>
+            </View>
+            
+            <FlatList 
+                horizontal
+                data={bestSellers}
+                renderItem={renderBestSellerItem}
+                keyExtractor={(item) => "best_" + item.id.toString()}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingRight: 20 }}
+            />
+          </View>
+      )}
+
+      {/* Discount products*/}
+      {discountProducts.length > 0 && (
+          <View className="mb-4 px-2">
+            <View className="flex-row items-center mb-3 px-2">
+                <Ionicons name="pricetag" size={20} color="#DC2626" />
+                <Text className="text-lg font-bold text-gray-800 ml-1">Đang giảm giá</Text>
+            </View>
+            
+            <FlatList 
+                scrollEnabled={false}
+                numColumns={2}
+                data={discountProducts}
+                renderItem={renderDiscountItem}
+                keyExtractor={(item) => "voucher_" + item.id.toString()}
+                contentContainerStyle={{ paddingBottom: 10 }}
+                key={'grid_2_cols'} 
+            />
+          </View>
+      )}
+
+      <View className="px-4 mb-3">
+        <Text className="text-lg font-bold text-gray-800">Tất cả sản phẩm</Text>
+      </View>
+    </View>
+  );
+
   return (
     <View className="flex-1 bg-gray-50 pt-4 relative">
       {/* Header Bar */}
@@ -248,38 +362,22 @@ export default function HomeScreen() {
         </TouchableWithoutFeedback>
       )}
 
-      {bestSellers.length > 0 && (
-          <View className="mb-4 pl-4">
-            <View className="flex-row items-center mb-3">
-                <Ionicons name="flame" size={20} color="orange" />
-                <Text className="text-lg font-bold text-gray-800 ml-1">Bán chạy nhất</Text>
-            </View>
-            
-            <FlatList 
-                horizontal
-                data={bestSellers}
-                renderItem={renderBestSellerItem}
-                keyExtractor={(item) => "best_" + item.id.toString()}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingRight: 20 }}
-            />
-          </View>
-      )}
-
-      {/* Product List */}
-      <View className="flex-1 px-4 z-0">
-        <Text className="text-lg font-bold text-gray-800 mb-3">Tất cả sản phẩm</Text>
+      <View className="flex-1 z-0"> 
         {loading ? (
            <ActivityIndicator size="large" color="#2563EB" className="mt-10" />
         ) : (
           <FlatList
+            ListHeaderComponent={renderHeaderContent()}
+            
             data={products}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderProductItem}
             showsVerticalScrollIndicator={false}
+            
             contentContainerStyle={{ paddingBottom: 20 }}
+            
             refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchProducts(); }} />
+                <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadInitialData(); }} />
             }
             ListEmptyComponent={
                 <Text className="text-center text-gray-500 mt-10">Không tìm thấy sản phẩm nào</Text>
