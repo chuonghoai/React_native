@@ -1,0 +1,16 @@
+export const ENDPOINTS = {
+  REGISTER: "/api/auth/register",
+  VERIFY_OTP: "/api/auth/verify-otp",
+  LOGIN: "/api/auth/login",
+  FORGOT_PASSWORD: "/api/auth/forgot-password",
+  RESET_PASSWORD: "/api/auth/reset-password",
+  LOGOUT: "/api/auth/logout",
+  GET_ME: "/api/auth/me/get",
+  UPDATE_PROFILE: "/api/user/update-profile",
+  CHANGE_PASSWORD: "/api/user/change-password",
+  REQUEST_CHANGE_EMAIL: "/api/user/request-change-email",
+  VERIFY_CHANGE_EMAIL: "/api/user/verify-change-email",
+  GET_PRODUCTS: "/products",
+  SEARCH_PRODUCTS: "/products/search", 
+  FILTER_PRODUCTS: "/products/category",
+} as const;
