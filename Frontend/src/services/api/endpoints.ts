@@ -25,4 +25,5 @@ export const ENDPOINTS = {
   GET_CART: "/api/cart",
   ADD_TO_CART: "/api/cart/add",
   REMOVE_FROM_CART: "/api/cart/remove",
+  UPDATE_CART: "/api/cart/update",
 } as const;

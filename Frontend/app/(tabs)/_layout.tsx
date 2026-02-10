@@ -49,6 +49,13 @@ export default function TabsLayout() {
           href: null, 
         }}
       />
+
+      <Tabs.Screen
+        name="orders/checkout"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

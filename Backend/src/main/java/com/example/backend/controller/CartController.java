@@ -30,4 +30,9 @@ public class CartController {
     public ApiResponse removeFromCart(@RequestBody CartRequest request) {
         return cartService.removeFromCart(request.getProductId());
     }
+
+    @PostMapping("/update")
+    public ApiResponse updateQuantity(@RequestBody CartRequest request) {
+        return cartService.updateQuantity(request.getProductId(), request.getQuantity());
+    }
 }
