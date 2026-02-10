@@ -35,10 +35,14 @@ export const productController = {
     }
   },
 
-  async filter(categories: string[]): Promise<ProductResult> {
+  async filter(categories: string[], page = 0, size = 20, sortBy = 'id', order = 'desc'): Promise<ProductResult> {
     try {
-      const res = await productService.filterByCategory(categories);
-      if (res.success && res.data) return { ok: true, data: res.data };
+      const res = await productService.filterByCategory(categories, page, size, sortBy, order);
+      
+      if (res.success && res.data) {
+        const products = res.data.content || res.data; 
+        return { ok: true, data: products };
+      }
       return { ok: false, message: res.message || "Lỗi lọc sản phẩm" };
     } catch (e: any) {
       return { ok: false, message: e.message || "Lỗi kết nối" };

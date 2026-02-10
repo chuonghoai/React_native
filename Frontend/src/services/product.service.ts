@@ -14,10 +14,10 @@ export const productService = {
     return http.get<ApiResponse<Product[]>>(url);
   },
 
-  filterByCategory(categories: string[]) {
+  filterByCategory(categories: string[], page = 0, size = 20, sortBy = 'id', order = 'desc') {
     const categoryString = categories.join(",");
-    const url = `${ENDPOINTS.FILTER_PRODUCTS}/${categoryString}`;
-    return http.get<ApiResponse<Product[]>>(url);
+    const url = `${ENDPOINTS.FILTER_PRODUCTS}/${categoryString}?page=${page}&size=${size}&sortBy=${sortBy}&order=${order}`;
+    return http.get<ApiResponse<any>>(url);
   },
 
   getProductDetail(id: number) {

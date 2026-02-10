@@ -94,7 +94,13 @@ export default function HomeScreen() {
     setLoading(true);
     
     if (selectedCategoryName) {
-        const res = await productController.filter([selectedCategoryName]);
+        const res = await productController.filter(
+            [selectedCategoryName], 
+            0,
+            20,
+            selectedSort.sortBy,
+            selectedSort.order
+        );
         if (res.ok) setProducts(res.data);
     } else {
         const res = await productController.getList(0, 20, selectedSort.sortBy, selectedSort.order);
@@ -299,6 +305,7 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-gray-50 pt-4 relative">
+
       {/* Header Bar */}
       <View className="flex-row items-center justify-between px-4 mb-2 z-20">
         {!isSearchActive ? (
@@ -362,6 +369,7 @@ export default function HomeScreen() {
         </TouchableWithoutFeedback>
       )}
 
+      {/* Product List */}
       <View className="flex-1 z-0"> 
         {loading ? (
            <ActivityIndicator size="large" color="#2563EB" className="mt-10" />

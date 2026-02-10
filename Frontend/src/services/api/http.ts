@@ -11,20 +11,29 @@ async function request<T>(method: HttpMethod, path: string, body?: unknown): Pro
 
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${ENV.API_BASE_URL}${path}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  try {
+    const res = await fetch(`${ENV.API_BASE_URL}${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
 
-  const json = await res.json().catch(() => null);
+    if (!res.ok) {
+        const errorJson = await res.json().catch(() => null);
+        const msg = errorJson?.message ?? `Lỗi HTTP ${res.status}`;
+        throw new Error(msg);
+    }
 
-  if (!res.ok) {
-    const msg = json?.message ?? `HTTP ${res.status}`;
-    throw new Error(msg);
+    const json = await res.json();
+    return json as T;
+
+  } catch (error: any) {
+    if (error instanceof TypeError || error.message?.includes("Network request failed") || error.message?.includes("status provided (0)")) {
+         console.error("Lỗi kết nối mạng:", error);
+         throw new Error("Không thể kết nối đến Server.");
+    }
+    throw error;
   }
-
-  return json as T;
 }
 
 export const http = {

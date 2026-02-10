@@ -18,7 +18,7 @@ public class VoucherController {
     @Autowired
     private VoucherService voucherService;
 
-@GetMapping
+    @GetMapping
     public ApiResponse getDiscountedProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
