@@ -1,3 +1,4 @@
+import { cartController } from "@/src/controllers/cart.controller";
 import { productController } from "@/src/controllers/product.controller";
 import { ProductDetail } from "@/src/models/product.model";
 import { Ionicons } from "@expo/vector-icons";
@@ -5,17 +6,19 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams();
-  const [product, setProduct] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState<ProductDetail | null>(null);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -60,8 +63,27 @@ export default function ProductDetailScreen() {
     );
   }
 
+  const handleAddToCart = async () => {
+    if (!product) return;
+    if (addingToCart) return;
+
+    setAddingToCart(true);
+    
+    const res = await cartController.addToCart(product.id, 1);
+    
+    setAddingToCart(false);
+
+    if (res.ok) {
+        Alert.alert("Thành công", "Sản phẩm đã được thêm vào giỏ hàng");
+    } else {
+        Alert.alert("Lỗi", res.message);
+    }
+  };
+
   return (
     <View className="flex-1 bg-white">
+
+      {/* Back button */}
       <View className="absolute top-4 left-4 z-10">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -71,6 +93,7 @@ export default function ProductDetailScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Product infomation */}
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <Image
           source={{ uri: product.imageUrl || "https://via.placeholder.com/300" }}
@@ -105,11 +128,25 @@ export default function ProductDetailScreen() {
         </View>
       </ScrollView>
 
-      {/* <View className="p-4 border-t border-gray-100 bg-white safe-bottom">
-        <TouchableOpacity className="bg-blue-600 w-full py-4 rounded-xl items-center shadow-lg shadow-blue-200">
-          <Text className="text-white font-bold text-lg">Thêm vào giỏ hàng</Text>
+      {/* Add to cart button */}
+      <View className="p-4 border-t border-gray-100 bg-white safe-bottom">
+        <TouchableOpacity 
+            className={`w-full py-4 rounded-xl items-center shadow-lg shadow-blue-200 flex-row justify-center ${
+                addingToCart ? "bg-blue-400" : "bg-blue-600"
+            }`}
+            onPress={handleAddToCart}
+            disabled={addingToCart}
+        >
+          {addingToCart ? (
+            <>
+                <ActivityIndicator size="small" color="white" className="mr-2" />
+                <Text className="text-white font-bold text-lg">Đang thêm...</Text>
+            </>
+          ) : (
+             <Text className="text-white font-bold text-lg">Thêm vào giỏ hàng</Text>
+          )}
         </TouchableOpacity>
-      </View> */}
+      </View>
     </View>
   );
 }

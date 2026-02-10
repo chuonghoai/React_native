@@ -4,7 +4,7 @@ import { userController } from "@/src/controllers/user.controller";
 import type { UserData } from "@/src/models/user.model";
 import { userLocal } from "@/src/storage/user.local";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -85,7 +85,10 @@ export default function ProfileScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadData(); }} />
         }
       >
+
+        {/* User infomation */}
         <View className="bg-white pb-6 pt-4 rounded-b-3xl shadow-sm items-center mb-6">
+          {/* Avartar */}
           <View className="relative mb-4">
             <Image
               source={{
@@ -95,14 +98,17 @@ export default function ProfileScreen() {
             />
           </View>
 
+          {/* Full name */}
           <Text className="text-2xl font-bold text-gray-800 mb-1">
             {me?.fullname || "Chưa cập nhật tên"}
           </Text>
           
+          {/* Username */}
           <Text className="text-gray-500 font-medium mb-4">
             @{me?.username}
           </Text>
 
+          {/* SDT and email */}
           <View className="flex-row gap-2 mb-6">
             <View className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full">
               <Ionicons name="call" size={14} color="#2563EB" />
@@ -117,7 +123,8 @@ export default function ProfileScreen() {
               </Text>
             </View>
           </View>
-
+          
+          {/* Edit profile button */}
           <TouchableOpacity
             onPress={() => setShowEditProfile(true)}
             className="bg-black px-6 py-2.5 rounded-full flex-row items-center"
@@ -127,12 +134,41 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* User's cart/order */}
+        <View className="px-4 mb-6">
+          <View className="flex-row gap-3">
+            {/* Cart button */}
+            <TouchableOpacity
+              className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center border border-gray-100"
+              onPress={() => router.push("/cart/cart")} 
+            >
+              <View className="bg-blue-50 p-3 rounded-full mb-2">
+                <Ionicons name="cart" size={24} color="#2563EB" />
+              </View>
+              <Text className="font-bold text-gray-700">Giỏ hàng</Text>
+            </TouchableOpacity>
+
+            {/* Orders button */}
+            <TouchableOpacity
+              className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center border border-gray-100"
+              onPress={() => router.push("/orders/orders")}
+            >
+              <View className="bg-orange-50 p-3 rounded-full mb-2">
+                <Ionicons name="receipt" size={24} color="#F97316" />
+              </View>
+              <Text className="font-bold text-gray-700">Đơn hàng</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* User function */}
         <View className="px-4">
           <Text className="text-gray-500 font-bold mb-3 uppercase text-xs ml-2">
             Cài đặt tài khoản
           </Text>
           
           <View className="bg-white rounded-2xl overflow-hidden shadow-sm">
+            {/* Change password button */}
             <TouchableOpacity
               className="flex-row items-center p-4 border-b border-gray-100"
               onPress={() => setShowPasswordModal(true)}
@@ -144,6 +180,7 @@ export default function ProfileScreen() {
               <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
             </TouchableOpacity>
 
+            {/* Change email button */}
             <TouchableOpacity
               className="flex-row items-center p-4 border-b border-gray-100"
               onPress={() => setShowEmailModal(true)}
@@ -153,11 +190,11 @@ export default function ProfileScreen() {
               </View>
               <View className="flex-1">
                 <Text className="text-gray-700 font-medium">Đổi Email</Text>
-                <Text className="text-xs text-gray-400">Cần xác thực OTP</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
             </TouchableOpacity>
 
+            {/* Logout button */}
             <TouchableOpacity
               className="flex-row items-center p-4"
               onPress={onLogout}
@@ -212,7 +249,6 @@ function EditProfileModal({ visible, onClose, currentUser, onSuccess }: any) {
         setLoading(false);
     
         if (res.ok) {
-          Alert.alert("Thành công", "Đã cập nhật hồ sơ");
           onSuccess();
           onClose();
         } else {

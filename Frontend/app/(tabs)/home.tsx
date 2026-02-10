@@ -1,12 +1,12 @@
-import { homeController } from "@/src/controllers/home.controller"; // Import homeController để lấy data User
+import { homeController } from "@/src/controllers/home.controller";
 import { productController } from "@/src/controllers/product.controller";
 import { voucherController } from "@/src/controllers/voucher.controller";
 import { Category, Product } from "@/src/models/product.model";
 import { ProductDiscount } from "@/src/models/voucher.model";
-import { userLocal } from "@/src/storage/user.local"; // Import storage
+import { userLocal } from "@/src/storage/user.local";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useFocusEffect } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { router } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -49,11 +49,9 @@ export default function HomeScreen() {
   const [selectedSort, setSelectedSort] = useState(SORT_OPTIONS[0]);
   const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadInitialData();
-    }, [selectedSort, selectedCategoryName])
-  );
+  useEffect(() => {
+    loadInitialData();
+  }, [selectedSort, selectedCategoryName]);
 
   const loadInitialData = async () => {
     if (categories.length === 0) {
@@ -390,6 +388,10 @@ export default function HomeScreen() {
             ListEmptyComponent={
                 <Text className="text-center text-gray-500 mt-10">Không tìm thấy sản phẩm nào</Text>
             }
+            removeClippedSubviews={true}
+            initialNumToRender={6}
+            maxToRenderPerBatch={6}
+            windowSize={5}
           />
         )}
       </View>

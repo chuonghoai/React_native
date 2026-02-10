@@ -1,3 +1,4 @@
+import { homeController } from "@/src/controllers/home.controller"; // Import Controller
 import { authStore } from "@/src/stores/auth.store";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -10,12 +11,22 @@ export default function Index() {
     (async () => {
       try {
         await authStore.hydrate();
-        console.log("TOKEN:", authStore.getToken());
-        if (authStore.isLoggedIn()) {
-          router.replace("/(tabs)/home");
+        const token = authStore.getToken();
+        
+        if (token) {
+          const res = await homeController.loadMe();
+          
+          if (res.ok) {
+            router.replace("/(tabs)/home");
+          } else {
+            await authStore.clear();
+            router.replace("/(auth)/login");
+          }
         } else {
           router.replace("/(auth)/login");
         }
+      } catch (e) {
+        router.replace("/(auth)/login");
       } finally {
         setLoading(false);
       }
@@ -24,7 +35,7 @@ export default function Index() {
 
   return (
     <View className="flex-1 items-center justify-center bg-white">
-      <ActivityIndicator size="large" />
+      <ActivityIndicator size="large" color="#2563EB" />
     </View>
   );
 }
