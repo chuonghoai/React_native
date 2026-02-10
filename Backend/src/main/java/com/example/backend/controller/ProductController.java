@@ -66,9 +66,15 @@ public class ProductController {
     }
 
     @GetMapping("/category/{categories}")
-    public ApiResponse filterProducts(@PathVariable List<String> categories) {
+    public ApiResponse filterProducts(
+            @PathVariable List<String> categories,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String order
+    ) {
         try {
-            return productService.filterProducts(categories);
+            return productService.filterProducts(categories, page, size, sortBy, order);
         } catch (Exception e) {
             return ApiResponse.error("Lỗi lọc: " + e.getMessage());
         }

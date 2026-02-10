@@ -2,7 +2,6 @@ package com.example.backend.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,28 +15,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "order_items")
+@Table(name = "cart_items")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderItem {
+public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private Integer quantity;
 
-    @Column(nullable = false)
-    private Double price;
-
     @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    @JsonIgnore
-    private Order order;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "cart_id")
+    @JsonIgnore
+    private Cart cart;
 }

@@ -75,9 +75,22 @@ public class ProductService {
         return ApiResponse.success("Tìm thấy " + products.size() + " kết quả", mapToDto(products));
     }
 
-    public ApiResponse filterProducts(List<String> categories) {
-        List<Product> products = productRepository.findByCategory_NameIn(categories);
-        return ApiResponse.success("Lọc thành công", mapToDto(products));
+    public ApiResponse filterProducts(List<String> categories, int page, int size, String sortBy, String order) {
+        Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        Page<Product> productPage = productRepository.findByCategory_NameIn(categories, pageable);
+        
+        List<ProductListResponse> responseList = mapToDto(productPage.getContent());
+
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("content", responseList);
+        metadata.put("page", productPage.getNumber());
+        metadata.put("size", productPage.getSize());
+        metadata.put("totalElements", productPage.getTotalElements());
+        metadata.put("totalPages", productPage.getTotalPages());
+
+        return ApiResponse.success("Lọc thành công", metadata);
     }
 
     public ApiResponse getTop10BestSellers() {

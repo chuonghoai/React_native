@@ -3,9 +3,15 @@ package com.example.backend.entities;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.backend.enums.OrderStatus;
+import com.example.backend.enums.PaymentMethod;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,11 +41,23 @@ public class Order {
     @Column(nullable = false)
     private Double totalPrice;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private OrderStatus status; 
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentMethod paymentMethod;
+
+    @Column(nullable = false)
+    private String shippingAddress; 
+    
+    @Column(nullable = false)
+    private String shippingPhone;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)

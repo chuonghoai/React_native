@@ -7,12 +7,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.example.backend.entities.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByNameContainingIgnoreCaseOrCategory_NameContainingIgnoreCase(String name, String categoryName);
-    List<Product> findByCategory_NameIn(List<String> categories);
+
+    @Query("SELECT p FROM Product p WHERE p.category.name IN :categories")
+    Page<Product> findByCategory_NameIn(@Param("categories") List<String> categories, Pageable pageable);
 
     @Query("SELECT p FROM OrderItem oi JOIN oi.product p " +
            "GROUP BY p.id, p.name, p.price, p.imageUrl, p.description, p.quantity, p.category " +
