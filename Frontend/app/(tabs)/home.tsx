@@ -150,7 +150,7 @@ export default function HomeScreen() {
   const renderProductItem = ({ item }: { item: Product }) => (
     <TouchableOpacity 
       activeOpacity={0.9}
-      onPress={() => router.push({ pathname: "/(tabs)/product/[id]", params: { id: item.id.toString() } })}
+      onPress={() => router.push({ pathname: "/product/[id]", params: { id: item.id.toString() } })}
     >
       <View className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
         <Image
@@ -174,7 +174,7 @@ export default function HomeScreen() {
   const renderBestSellerItem = ({ item }: { item: Product }) => (
     <TouchableOpacity 
       activeOpacity={0.9}
-      onPress={() => router.push({ pathname: "/(tabs)/product/[id]", params: { id: item.id.toString() } })}
+      onPress={() => router.push({ pathname: "/product/[id]", params: { id: item.id.toString() } })}
       className="mr-4 w-40"
     >
       <View className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -203,7 +203,7 @@ export default function HomeScreen() {
       activeOpacity={0.9}
       onPress={() =>
         router.push({
-          pathname: "/(tabs)/product/[id]",
+          pathname: "/product/[id]",
           params: { id: item.id.toString() },
         })
       }
