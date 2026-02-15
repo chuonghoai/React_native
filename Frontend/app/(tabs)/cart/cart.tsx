@@ -158,7 +158,7 @@ export default function CartScreen() {
     <View className="flex-1 bg-gray-50 relative">
       
       {/* Header */}
-      <View className="bg-white px-4 pt-12 pb-4 border-b border-gray-100 flex-row items-center">
+      <View className="bg-white px-4 pt-4 pb-4 border-b border-gray-100 flex-row items-center">
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
              <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
