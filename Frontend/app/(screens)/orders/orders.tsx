@@ -109,32 +109,43 @@ export default function OrderHistoryScreen() {
             </View>
         </View>
 
-        {/* Product preview */}
-        {firstItem && (
-            <View className="flex-row items-center mb-3">
-                <Image source={{ uri: firstItem.product.imageUrl }} className="w-16 h-16 rounded-md bg-gray-200" />
-                <View className="flex-1 ml-3">
-                    <Text className="font-bold text-gray-800" numberOfLines={1}>{firstItem.product.name}</Text>
-                    <View className="flex-row justify-between mt-1">
-                        <Text className="text-gray-500 text-sm">x{firstItem.quantity}</Text>
-                        <Text className="text-red-600">{formatCurrency(firstItem.price)}</Text>
+        <TouchableOpacity 
+            activeOpacity={0.7}
+            onPress={() => router.push({ 
+                pathname: "/orders/[id]", 
+                params: { id: item.id.toString(),
+                  orderData: JSON.stringify(item)
+                 } 
+            })}
+        >
+            {/* Product preview */}
+            {firstItem && (
+                <View className="flex-row items-center mb-3">
+                    <Image source={{ uri: firstItem.product.imageUrl }} className="w-16 h-16 rounded-md bg-gray-200" />
+                    <View className="flex-1 ml-3">
+                        <Text className="font-bold text-gray-800" numberOfLines={1}>{firstItem.product.name}</Text>
+                        <View className="flex-row justify-between mt-1">
+                            <Text className="text-gray-500 text-sm">x{firstItem.quantity}</Text>
+                            <Text className="text-red-600">{formatCurrency(firstItem.price)}</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
-        )}
+            )}
 
-        {extraItemsCount > 0 && (
-             <Text className="text-center text-gray-400 text-sm mb-3 border-t border-gray-50 pt-2">
-                 Hiển thị thêm {extraItemsCount} sản phẩm...
-             </Text>
-        )}
+            {extraItemsCount > 0 && (
+                 <View className="mb-3 border-t border-gray-50 pt-3">
+                     <Text className="text-center text-gray-400 text-sm font-medium">
+                         Xem thêm {extraItemsCount} sản phẩm khác...
+                     </Text>
+                 </View>
+            )}
+        </TouchableOpacity>
 
         <View className="flex-row justify-between items-center pt-2 border-t border-gray-100">
             <Text className="text-gray-600 font-medium">Tổng tiền:</Text>
             <Text className="text-lg font-bold text-red-600">{formatCurrency(item.totalPrice)}</Text>
         </View>
 
-        {/* Nút hủy đơn hiển thị nếu trạng thái là NEW */}
         {item.status === 'NEW' && (
             <TouchableOpacity 
                 onPress={() => handleCancelOrder(item.id)}
