@@ -10,6 +10,7 @@ export const ENDPOINTS = {
   // User profile
   GET_ME: "/api/auth/me/get",
   UPDATE_PROFILE: "/api/user/update-profile",
+  UPLOAD_AVATAR: "/api/user/upload-avatar",
   CHANGE_PASSWORD: "/api/user/change-password",
   REQUEST_CHANGE_EMAIL: "/api/user/request-change-email",
   VERIFY_CHANGE_EMAIL: "/api/user/verify-change-email",

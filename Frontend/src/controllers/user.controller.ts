@@ -36,6 +36,26 @@ export const userController = {
     }
   },
 
+  async uploadAvatarImage(imageUri: string): Promise<{ ok: boolean; url?: string; message?: string }> {
+    try {
+      const formData = new FormData();
+      const filename = imageUri.split('/').pop() || 'avatar.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : `image/jpeg`;
+
+      formData.append('file', { uri: imageUri, name: filename, type } as any);
+
+      const res = await userService.uploadAvatar(formData);
+      
+      if (res.success && res.data) {
+        return { ok: true, url: res.data };
+      }
+      return { ok: false, message: res.message || "Lỗi upload ảnh" };
+    } catch (e: any) {
+      return { ok: false, message: e.message || "Lỗi kết nối upload ảnh" };
+    }
+  },
+
   async changePassword(input: ChangePasswordRequest): Promise<ControllerResult> {
     if (!input.oldPassword || !input.newPassword) {
       return { ok: false, message: "Vui lòng nhập đủ thông tin" };

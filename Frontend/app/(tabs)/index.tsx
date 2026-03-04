@@ -4,6 +4,7 @@ import { userController } from "@/src/controllers/user.controller";
 import type { UserData } from "@/src/models/user.model";
 import { userLocal } from "@/src/storage/user.local";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -230,98 +231,132 @@ export default function ProfileScreen() {
 }
 
 function EditProfileModal({ visible, onClose, currentUser, onSuccess }: any) {
-     const [fullname, setFullname] = useState("");
-      const [phone, setPhone] = useState("");
-      const [avatarUrl, setAvatarUrl] = useState("");
-      const [loading, setLoading] = useState(false);
-    
-      useEffect(() => {
-        if (visible && currentUser) {
-          setFullname(currentUser.fullname || "");
-          setPhone(currentUser.phone || "");
-          setAvatarUrl(currentUser.avatarUrl || "");
-        }
-      }, [visible, currentUser]);
-    
-      async function handleSave() {
-        setLoading(true);
-        const res = await userController.updateProfile({ fullname, phone, avatarUrl });
+  const [fullname, setFullname] = useState("");
+  const [phone, setPhone] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [localImageUri, setLocalImageUri] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (visible && currentUser) {
+      setFullname(currentUser.fullname || "");
+      setPhone(currentUser.phone || "");
+      setAvatarUrl(currentUser.avatarUrl || "");
+      setLocalImageUri(null);
+    }
+  }, [visible, currentUser]);
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setLocalImageUri(result.assets[0].uri);
+    }
+  };
+
+  async function handleSave() {
+    setLoading(true);
+    let finalAvatarUrl = avatarUrl;
+
+    if (localImageUri) {
+      const uploadRes = await userController.uploadAvatarImage(localImageUri);
+      if (uploadRes.ok && uploadRes.url) {
+        finalAvatarUrl = uploadRes.url;
+      } else {
+        Alert.alert("Lỗi tải ảnh", uploadRes.message);
         setLoading(false);
-    
-        if (res.ok) {
-          onSuccess();
-          onClose();
-        } else {
-          Alert.alert("Lỗi", res.message);
-        }
+        return;
       }
+    }
+
+    const res = await userController.updateProfile({ 
+      fullname, 
+      phone, 
+      avatarUrl: finalAvatarUrl 
+    });
     
-      return (
-        <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-          <View className="flex-1 bg-gray-50">
-            <View className="bg-white px-4 py-4 flex-row justify-between items-center border-b border-gray-200 shadow-sm">
-              <TouchableOpacity onPress={onClose}>
-                <Text className="text-blue-600 text-lg">Hủy</Text>
-              </TouchableOpacity>
-              <Text className="font-bold text-lg">Sửa hồ sơ</Text>
-              <TouchableOpacity onPress={handleSave} disabled={loading}>
-                <Text className={`text-lg font-bold ${loading ? "text-gray-400" : "text-blue-600"}`}>
-                  {loading ? "Lưu..." : "Lưu"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-    
-            <ScrollView className="p-4">
-              <View className="items-center mb-6 mt-4">
-                <Image
-                    source={{ uri: avatarUrl || currentUser?.avatarUrl || "https://ui-avatars.com/api/?name=User" }}
-                    className="w-24 h-24 rounded-full border-2 border-gray-200 mb-3"
-                />
-                <Text className="text-blue-600 font-medium mb-2">Dán link ảnh avatar mới:</Text>
-                <TextInput 
-                  value={avatarUrl}
-                  onChangeText={setAvatarUrl}
-                  placeholder="https://..."
-                  className="bg-white border border-gray-300 rounded px-3 py-2 w-full text-sm text-gray-600"
-                />
+    setLoading(false);
+
+    if (res.ok) {
+      Alert.alert("Thành công", "Đã cập nhật hồ sơ");
+      onSuccess();
+      onClose();
+    } else {
+      Alert.alert("Lỗi", res.message);
+    }
+  }
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+      <View className="flex-1 bg-gray-50">
+        <View className="bg-white px-4 py-4 flex-row justify-between items-center border-b border-gray-200 shadow-sm">
+          <TouchableOpacity onPress={onClose}>
+            <Text className="text-blue-600 text-lg">Hủy</Text>
+          </TouchableOpacity>
+          <Text className="font-bold text-lg">Sửa hồ sơ</Text>
+          <TouchableOpacity onPress={handleSave} disabled={loading}>
+            <Text className={`text-lg font-bold ${loading ? "text-gray-400" : "text-blue-600"}`}>
+              {loading ? "Đang lưu..." : "Lưu"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView className="p-4">
+          {/* AVATAR */}
+          <View className="items-center mb-6 mt-4">
+            <TouchableOpacity onPress={pickImage} className="items-center relative">
+              <Image
+                source={{ uri: localImageUri || avatarUrl || currentUser?.avatarUrl || "https://ui-avatars.com/api/?name=User" }}
+                className="w-24 h-24 rounded-full border-2 border-gray-200 mb-2"
+              />
+              <View className="absolute bottom-2 right-0 bg-blue-600 p-1.5 rounded-full border-2 border-white">
+                <Ionicons name="camera" size={14} color="white" />
               </View>
-    
-              <View className="bg-white rounded-xl px-4 py-2 border border-gray-200">
-                <View className="py-3 border-b border-gray-100 flex-row items-center">
-                  <Text className="w-24 text-gray-500">Username</Text>
-                  <Text className="flex-1 text-gray-400 font-medium">@{currentUser?.username}</Text>
-                  <Ionicons name="lock-closed" size={14} color="#9CA3AF" />
-                </View>
-    
-                <View className="py-3 border-b border-gray-100 flex-row items-center">
-                  <Text className="w-24 text-gray-900 font-medium">Họ tên</Text>
-                  <TextInput 
-                    value={fullname}
-                    onChangeText={setFullname}
-                    placeholder="Nhập họ tên"
-                    className="flex-1 text-blue-600 font-medium"
-                  />
-                </View>
-    
-                <View className="py-3 flex-row items-center">
-                  <Text className="w-24 text-gray-900 font-medium">Số ĐT</Text>
-                  <TextInput 
-                    value={phone}
-                    onChangeText={setPhone}
-                    placeholder="Nhập số điện thoại"
-                    keyboardType="phone-pad"
-                    className="flex-1 text-blue-600 font-medium"
-                  />
-                </View>
-              </View>
-              
-              <Text className="text-gray-400 text-xs text-center mt-4">
-                Username không thể thay đổi vì lý do định danh.
-              </Text>
-            </ScrollView>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      );
+
+          {/* PROFILE */}
+          <View className="bg-white rounded-xl px-4 py-2 border border-gray-200">
+            <View className="py-3 border-b border-gray-100 flex-row items-center">
+              <Text className="w-24 text-gray-500">Username</Text>
+              <Text className="flex-1 text-gray-400 font-medium">@{currentUser?.username}</Text>
+              <Ionicons name="lock-closed" size={14} color="#9CA3AF" />
+            </View>
+
+            <View className="py-3 border-b border-gray-100 flex-row items-center">
+              <Text className="w-24 text-gray-900 font-medium">Họ tên</Text>
+              <TextInput 
+                value={fullname}
+                onChangeText={setFullname}
+                placeholder="Nhập họ tên"
+                className="flex-1 text-blue-600 font-medium"
+              />
+            </View>
+
+            <View className="py-3 flex-row items-center">
+              <Text className="w-24 text-gray-900 font-medium">Số ĐT</Text>
+              <TextInput 
+                value={phone}
+                onChangeText={setPhone}
+                placeholder="Nhập số điện thoại"
+                keyboardType="phone-pad"
+                className="flex-1 text-blue-600 font-medium"
+              />
+            </View>
+          </View>
+          
+          <Text className="text-gray-400 text-xs text-center mt-4">
+            Username không thể thay đổi vì lý do định danh.
+          </Text>
+        </ScrollView>
+      </View>
+    </Modal>
+  );
 }
 
 function ChangePasswordModal({ visible, onClose }: any) {
