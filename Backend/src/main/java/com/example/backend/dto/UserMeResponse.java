@@ -21,5 +21,6 @@ public class UserMeResponse {
     private String role;
     private String phone;
     private String avatarUrl;
+    private Integer rewardPoints;
     private List<Category> categories;
 }

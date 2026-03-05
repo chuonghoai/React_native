@@ -8,6 +8,7 @@ export type UserData = {
   role: string;
   phone?: string;
   avatarUrl?: string;
+  rewardPoints?: number;
   categories?: Category[]; 
 };
 

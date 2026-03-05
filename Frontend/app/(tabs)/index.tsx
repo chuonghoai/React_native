@@ -3,7 +3,7 @@ import { homeController } from "@/src/controllers/home.controller";
 import { userController } from "@/src/controllers/user.controller";
 import type { UserData } from "@/src/models/user.model";
 import { userLocal } from "@/src/storage/user.local";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -109,7 +109,7 @@ export default function ProfileScreen() {
             @{me?.username}
           </Text>
 
-          {/* SDT and email */}
+          {/* SDT, email and reward points */}
           <View className="flex-row gap-2 mb-6">
             <View className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full">
               <Ionicons name="call" size={14} color="#2563EB" />
@@ -120,9 +120,16 @@ export default function ProfileScreen() {
             <View className="flex-row items-center bg-gray-100 px-3 py-1 rounded-full">
               <Ionicons name="mail" size={14} color="#4B5563" />
               <Text className="ml-1 text-gray-600 text-xs">
-                {me?.email}
+                {me?.email || "Chưa có Email"}
               </Text>
             </View>
+          </View>
+
+          <View className="flex-row items-center bg-yellow-50 px-4 py-1.5 rounded-full mb-6 border border-yellow-200">
+            <MaterialCommunityIcons name="crown" size={18} color="#D97706" />
+            <Text className="ml-1.5 text-yellow-700 font-bold text-sm">
+              Điểm tích lũy: {me?.rewardPoints || 0}
+            </Text>
           </View>
           
           {/* Edit profile button */}

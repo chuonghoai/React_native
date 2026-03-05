@@ -176,6 +176,7 @@ public class AuthService {
             .role(user.getRole())
             .phone(user.getPhone())
             .avatarUrl(user.getAvatarUrl())
+            .rewardPoints(user.getRewardPoints())
             .categories(listCategories)
             .build();
 
