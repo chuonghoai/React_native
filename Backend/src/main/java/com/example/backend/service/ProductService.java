@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,10 +11,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.ProductListResponse;
 import com.example.backend.entities.Product;
+import com.example.backend.entities.Voucher;
 import com.example.backend.repositories.ProductRepository;
 
 @Service
@@ -41,6 +44,7 @@ public class ProductService {
         return ApiResponse.success("Lấy danh sách thành công", metadata);
     }
 
+    @Transactional(readOnly = true)
     public ApiResponse getProductDetail(Long id) {
         Product product = productRepository.findById(id).orElse(null);
         
@@ -48,7 +52,26 @@ public class ProductService {
             return ApiResponse.error("Không tìm thấy sản phẩm với ID: " + id);
         }
 
-        return ApiResponse.success("Lấy chi tiết sản phẩm thành công", product);
+        LocalDateTime now = LocalDateTime.now();
+        double totalDiscount = product.getVouchers().stream()
+                .filter(v -> !v.getStartDate().isAfter(now) && !v.getEndDate().isBefore(now))
+                .mapToDouble(Voucher::getDiscountAmount)
+                .sum();
+
+        double finalPrice = product.getPrice() - totalDiscount;
+        finalPrice = finalPrice < 0 ? 0 : finalPrice;
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("id", product.getId());
+        responseData.put("name", product.getName());
+        responseData.put("price", finalPrice);
+        responseData.put("originalPrice", product.getPrice());
+        responseData.put("description", product.getDescription());
+        responseData.put("imageUrl", product.getImageUrl());
+        responseData.put("quantity", product.getQuantity());
+        responseData.put("category", product.getCategory());
+
+        return ApiResponse.success("Lấy chi tiết sản phẩm thành công", responseData);
     }
     
     public ApiResponse createProduct(Product product) {

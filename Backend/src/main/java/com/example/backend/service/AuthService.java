@@ -1,5 +1,10 @@
 package com.example.backend.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -11,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.JwtUtil;
 import com.example.backend.dto.ApiResponse;
@@ -248,5 +254,32 @@ public class AuthService {
         userRepository.save(user);
 
         return ApiResponse.success("Đổi Email thành công!", null);
+    }
+
+    public ApiResponse uploadAvatar(MultipartFile file) {
+        if (file.isEmpty()) {
+            return ApiResponse.error("File trống");
+        }
+
+        try {
+            Path uploadPath = Paths.get("uploads/");
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            String originalFileName = file.getOriginalFilename();
+            String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            String fileName = "avatar_" + System.currentTimeMillis() + fileExtension;
+
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            String fileUrl = "http://10.0.2.2:8087/uploads/" + fileName;
+
+            return ApiResponse.success("Upload thành công", fileUrl);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Không thể lưu file ảnh", e);
+        }
     }
 }

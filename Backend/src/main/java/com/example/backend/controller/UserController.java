@@ -5,7 +5,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.ChangePasswordRequest;
@@ -54,6 +56,15 @@ public class UserController {
             return authService.verifyChangeEmail(request);
         } catch (Exception e) {
             return ApiResponse.error("Lỗi: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/upload-avatar")
+    public ApiResponse uploadAvatar(@RequestParam("file") MultipartFile file) {
+        try {
+            return authService.uploadAvatar(file);
+        } catch (Exception e) {
+            return ApiResponse.error("Lỗi upload: " + e.getMessage());
         }
     }
 }

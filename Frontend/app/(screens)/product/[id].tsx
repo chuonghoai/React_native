@@ -110,12 +110,21 @@ export default function ProductDetailScreen() {
             {product.name}
           </Text>
 
-          <View className="flex-row justify-between items-center mb-6">
-            <Text className="text-red-600 text-2xl font-bold">
-              {formatCurrency(product.price)}
-            </Text>
-            <View className="bg-gray-100 px-3 py-1 rounded-lg">
-                <Text className="text-gray-600 text-sm">Kho: {product.quantity}</Text>
+          <View className="flex-row justify-between items-start mb-6">
+            <View>
+              <Text className="text-red-600 text-2xl font-bold">
+                {formatCurrency(product.price)}
+              </Text>
+              
+              {product.originalPrice && product.originalPrice > product.price ? (
+                <Text className="text-gray-400 text-sm line-through mt-0.5">
+                  {formatCurrency(product.originalPrice)}
+                </Text>
+              ) : null}
+            </View>
+
+            <View className="bg-gray-100 px-3 py-1 rounded-lg mt-1">
+                <Text className="text-gray-600 text-sm font-medium">Kho: {product.quantity}</Text>
             </View>
           </View>
 
