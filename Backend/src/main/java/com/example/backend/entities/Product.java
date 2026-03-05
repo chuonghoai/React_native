@@ -47,6 +47,10 @@ public class Product {
     @Column
     private Long quantity;
 
+    @Column(columnDefinition = "bigint default 0")
+    @Builder.Default
+    private Long soldCount = 0L;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;

@@ -88,4 +88,9 @@ public class ProductController {
             return ApiResponse.error("Lỗi: " + e.getMessage());
         }
     }
+
+    @GetMapping("/{id}/similar")
+    public ApiResponse getSimilarProducts(@PathVariable Long id) {
+        return productService.getSimilarProducts(id);
+    }
 }

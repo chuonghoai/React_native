@@ -17,13 +17,17 @@ import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.ProductListResponse;
 import com.example.backend.entities.Product;
 import com.example.backend.entities.Voucher;
+import com.example.backend.repositories.FavoriteRepository;
 import com.example.backend.repositories.ProductRepository;
+import com.example.backend.repositories.ReviewRepository;
 
 @Service
 public class ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
+    @Autowired private ProductRepository productRepository;
+    @Autowired private ReviewRepository reviewRepository;
+    @Autowired private FavoriteRepository favoriteRepository;
+    @Autowired private AuthService authService;
 
     public ApiResponse getAllProducts(int page, int size, String sortBy, String order) {
         Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
@@ -61,6 +65,15 @@ public class ProductService {
         double finalPrice = product.getPrice() - totalDiscount;
         finalPrice = finalPrice < 0 ? 0 : finalPrice;
 
+        long reviewCount = reviewRepository.countByProductId(id);
+
+        boolean isFavorite = false;
+        try {
+            Long currentUserId = authService.getCurrentUserId();
+            isFavorite = favoriteRepository.existsByUserIdAndProductId(currentUserId, id);
+        } catch (Exception e) {
+        }
+
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("id", product.getId());
         responseData.put("name", product.getName());
@@ -70,6 +83,9 @@ public class ProductService {
         responseData.put("imageUrl", product.getImageUrl());
         responseData.put("quantity", product.getQuantity());
         responseData.put("category", product.getCategory());
+        responseData.put("soldCount", product.getSoldCount()); 
+        responseData.put("reviewCount", reviewCount);
+        responseData.put("isFavorite", isFavorite);
 
         return ApiResponse.success("Lấy chi tiết sản phẩm thành công", responseData);
     }
@@ -120,5 +136,15 @@ public class ProductService {
         List<Product> products = productRepository.findTop10BestSellers(PageRequest.of(0, 10));
         
         return ApiResponse.success("Lấy top 10 bán chạy thành công", mapToDto(products));
+    }
+
+    public ApiResponse getSimilarProducts(Long id) {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product == null) return ApiResponse.error("Không tìm thấy sản phẩm");
+
+        List<Product> similarProducts = productRepository
+                .findTop10ByCategoryIdAndIdNot(product.getCategory().getId(), id);
+                
+        return ApiResponse.success("Sản phẩm tương tự", mapToDto(similarProducts));
     }
 }

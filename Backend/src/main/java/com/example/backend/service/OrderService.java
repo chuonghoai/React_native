@@ -21,12 +21,14 @@ import com.example.backend.entities.Cart;
 import com.example.backend.entities.CartItem;
 import com.example.backend.entities.Order;
 import com.example.backend.entities.OrderItem;
+import com.example.backend.entities.Product;
 import com.example.backend.entities.Review;
 import com.example.backend.entities.User;
 import com.example.backend.enums.OrderStatus;
 import com.example.backend.enums.PaymentMethod;
 import com.example.backend.repositories.CartRepository;
 import com.example.backend.repositories.OrderRepository;
+import com.example.backend.repositories.ProductRepository;
 import com.example.backend.repositories.ReviewRepository;
 import com.example.backend.repositories.UserRepository;
 
@@ -38,6 +40,7 @@ public class OrderService {
     @Autowired private AuthService authService;
     @Autowired private UserRepository userRepository;
     @Autowired private ReviewRepository reviewRepository;
+    @Autowired private ProductRepository productRepository;
 
     @Transactional
     public ApiResponse createOrder(OrderRequest request) {
@@ -162,5 +165,26 @@ public class OrderService {
                 System.out.println("Auto confirmed order ID: " + order.getId());
             }
         }
+    }
+
+    @Transactional
+    public ApiResponse updateOrderStatus(Long orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        if (newStatus == OrderStatus.DELIVERED && order.getStatus() != OrderStatus.DELIVERED) {
+            for (OrderItem item : order.getOrderItems()) {
+                Product p = item.getProduct();
+                Long currentSold = p.getSoldCount() != null ? p.getSoldCount() : 0L;
+                p.setSoldCount(currentSold + item.getQuantity());
+                p.setQuantity(p.getQuantity() - item.getQuantity());
+                
+                productRepository.save(p);
+            }
+        }
+
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+        return ApiResponse.success("Cập nhật trạng thái thành công", null);
     }
 }

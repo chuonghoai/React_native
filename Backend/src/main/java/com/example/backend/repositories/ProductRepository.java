@@ -47,4 +47,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "GROUP BY p " +
            "ORDER BY (p.price - SUM(v.discountAmount)) DESC")
     Page<Object[]> findDiscountedProductsSortedByPriceDesc(LocalDateTime now, Pageable pageable);
+
+    List<Product> findTop10ByCategoryIdAndIdNot(Long categoryId, Long productId);
 }

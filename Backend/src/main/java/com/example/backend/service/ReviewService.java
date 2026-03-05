@@ -1,10 +1,14 @@
 package com.example.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,10 +69,12 @@ public class ReviewService {
         return ApiResponse.success("Đánh giá thành công! Bạn được cộng " + POINTS_PER_REVIEW + " điểm tích lũy.", null);
     }
 
-    public ApiResponse getProductReviews(Long productId) {
-        List<Review> reviews = reviewRepository.findByProductIdOrderByCreatedAtDesc(productId);
+    public ApiResponse getProductReviews(Long productId, int page, int size) {
+        Page<Review> reviewPage = reviewRepository.findByProductIdOrderByCreatedAtDesc(
+            productId, PageRequest.of(page, size)
+        );
         
-        List<ReviewResponse> responseList = reviews.stream().map(r -> 
+        List<ReviewResponse> responseList = reviewPage.getContent().stream().map(r -> 
             ReviewResponse.builder()
                 .id(r.getId())
                 .fullname(r.getUser().getFullname() != null ? r.getUser().getFullname() : r.getUser().getUsername())
@@ -79,6 +85,12 @@ public class ReviewService {
                 .build()
         ).collect(Collectors.toList());
 
-        return ApiResponse.success("Lấy danh sách đánh giá thành công", responseList);
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("content", responseList);
+        metadata.put("page", reviewPage.getNumber());
+        metadata.put("totalPages", reviewPage.getTotalPages());
+        metadata.put("totalElements", reviewPage.getTotalElements());
+
+        return ApiResponse.success("Lấy danh sách đánh giá thành công", metadata);
     }
 }
