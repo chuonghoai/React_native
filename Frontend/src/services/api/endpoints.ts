@@ -21,6 +21,9 @@ export const ENDPOINTS = {
   FILTER_PRODUCTS: "/products/category",
   GET_BEST_SELLERS: "/products/best-sellers",
   GET_DISCOUNT_PRODUCTS: "/vouchers",
+  TOGGLE_FAVORITE: "/api/favorites/toggle",
+  GET_FAVORITES: "/api/favorites",
+  GET_PRODUCT_REVIEWS: "/api/reviews/product",
 
   // Cart
   GET_CART: "/api/cart",
@@ -33,4 +36,5 @@ export const ENDPOINTS = {
   GET_ORDERS_HISTORY: "/api/orders/history",
   CANCEL_ORDER: "/api/orders/cancel",
   ADD_REVIEW: "/api/reviews/add",
+
 } as const;

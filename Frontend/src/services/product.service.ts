@@ -27,5 +27,9 @@ export const productService = {
   
   getBestSellers() {
     return http.get<ApiResponse<any>>(ENDPOINTS.GET_BEST_SELLERS);
-  }
+  },
+
+  getSimilarProducts(id: number) {
+    return http.get<ApiResponse<Product[]>>(`${ENDPOINTS.GET_PRODUCTS}/${id}/similar`);
+  },
 };

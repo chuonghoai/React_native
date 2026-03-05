@@ -74,4 +74,14 @@ export const productController = {
       return { ok: false, message: e.message || "Lỗi kết nối" };
     }
   },
+
+  async getSimilar(id: number): Promise<{ ok: true; data: Product[] } | { ok: false; message: string }> {
+    try {
+      const res = await productService.getSimilarProducts(id);
+      if (res.success && res.data) return { ok: true, data: res.data };
+      return { ok: false, message: res.message || "Lỗi tải sản phẩm tương tự" };
+    } catch (e: any) {
+      return { ok: false, message: e.message || "Lỗi kết nối" };
+    }
+  },
 };

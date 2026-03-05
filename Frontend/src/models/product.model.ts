@@ -20,4 +20,7 @@ export type ProductDetail = {
   imageUrl: string;
   quantity: number;
   category: Category;
+  soldCount?: number;
+  reviewCount?: number;
+  isFavorite?: boolean;
 };

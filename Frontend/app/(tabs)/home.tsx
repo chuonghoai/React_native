@@ -4,6 +4,7 @@ import { voucherController } from "@/src/controllers/voucher.controller";
 import { Category, Product } from "@/src/models/product.model";
 import { ProductDiscount } from "@/src/models/voucher.model";
 import { userLocal } from "@/src/storage/user.local";
+import { viewedLocal } from "@/src/storage/viewed.local";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -49,6 +50,8 @@ export default function HomeScreen() {
   const [selectedSort, setSelectedSort] = useState(SORT_OPTIONS[0]);
   const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(null);
 
+  const [viewedProducts, setViewedProducts] = useState<Product[]>([]);
+  
   useEffect(() => {
     loadInitialData();
   }, [selectedSort, selectedCategoryName]);
@@ -68,6 +71,9 @@ export default function HomeScreen() {
         setCategories(user.categories);
       }
     }
+
+    const viewed = await viewedLocal.get();
+    setViewedProducts(viewed);
 
     fetchBestSellers();
     fetchDiscountProducts();
@@ -291,6 +297,39 @@ export default function HomeScreen() {
                 keyExtractor={(item) => "voucher_" + item.id.toString()}
                 contentContainerStyle={{ paddingBottom: 10 }}
                 key={'grid_2_cols'} 
+            />
+          </View>
+      )}
+
+      {/* Recently viewed */}
+      {viewedProducts.length > 0 && (
+          <View className="mb-4 pl-4 pt-4 border-t border-gray-100">
+            <View className="flex-row items-center mb-3">
+                <Ionicons name="time" size={20} color="#4B5563" />
+                <Text className="text-lg font-bold text-gray-800 ml-1">Sản phẩm bạn vừa xem</Text>
+            </View>
+            
+            <FlatList 
+                horizontal
+                data={viewedProducts}
+                renderItem={({ item }) => (
+                    <TouchableOpacity 
+                        activeOpacity={0.9}
+                        onPress={() => router.push({ pathname: "/product/[id]", params: { id: item.id.toString() } })}
+                        className="mr-3 w-32"
+                    >
+                        <View className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                            <Image source={{ uri: item.imageUrl || "https://via.placeholder.com/150" }} className="w-full h-28 bg-gray-200" resizeMode="cover" />
+                            <View className="p-2">
+                            <Text className="text-xs font-bold text-gray-800 mb-1" numberOfLines={2}>{item.name}</Text>
+                            <Text className="text-red-600 font-bold text-xs">{formatCurrency(item.price)}</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                )}
+                keyExtractor={(item) => "viewed_" + item.id.toString()}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingRight: 20 }}
             />
           </View>
       )}
