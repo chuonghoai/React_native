@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { homeController } from "@/src/controllers/home.controller";
 import { productController } from "@/src/controllers/product.controller";
 import { voucherController } from "@/src/controllers/voucher.controller";
@@ -51,6 +52,9 @@ export default function HomeScreen() {
   const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(null);
 
   const [viewedProducts, setViewedProducts] = useState<Product[]>([]);
+
+  const [isShowingSearchResults, setIsShowingSearchResults] = useState(false);
+  const [searchedKeyword, setSearchedKeyword] = useState("");
   
   useEffect(() => {
     loadInitialData();
@@ -96,6 +100,7 @@ export default function HomeScreen() {
 
   const fetchProducts = async () => {
     setLoading(true);
+    setIsShowingSearchResults(false);
     
     if (selectedCategoryName) {
         const res = await productController.filter(
@@ -132,8 +137,17 @@ export default function HomeScreen() {
     if (!keyword.trim()) return;
     setLoading(true);
     setSelectedCategoryName(null);
+    
+    const currentKeyword = keyword;
     const res = await productController.search(keyword);
-    if (res.ok) setProducts(res.data);
+    
+    if (res.ok) {
+        setProducts(res.data);
+        setSearchedKeyword(currentKeyword);
+        setIsShowingSearchResults(true);
+        toggleSearchBar();
+    }
+    
     setLoading(false);
   };
 
@@ -151,6 +165,12 @@ export default function HomeScreen() {
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  };
+
+  const clearSearch = () => {
+      setIsShowingSearchResults(false);
+      setSearchedKeyword("");
+      fetchProducts();
   };
 
   const renderProductItem = ({ item }: { item: Product }) => (
@@ -340,6 +360,17 @@ export default function HomeScreen() {
     </View>
   );
 
+  const renderSearchResultHeader = () => (
+    <View className="px-4 mb-4 mt-2 flex-row justify-between items-center border-b border-gray-100 pb-3">
+      <Text className="text-lg font-bold text-gray-800">
+        Kết quả cho: "{searchedKeyword}"
+      </Text>
+      <TouchableOpacity onPress={clearSearch} className="bg-gray-100 px-3 py-1.5 rounded-full">
+        <Text className="text-blue-600 font-medium text-sm">Hủy tìm kiếm</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <View className="flex-1 bg-gray-50 pt-4 relative">
 
@@ -412,8 +443,7 @@ export default function HomeScreen() {
            <ActivityIndicator size="large" color="#2563EB" className="mt-10" />
         ) : (
           <FlatList
-            ListHeaderComponent={renderHeaderContent()}
-            
+            ListHeaderComponent={isShowingSearchResults ? renderSearchResultHeader() : renderHeaderContent()}            
             data={products}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderProductItem}

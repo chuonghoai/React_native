@@ -111,6 +111,7 @@ public class ProductService {
         List<Product> products = 
             productRepository
             .findByNameContainingIgnoreCaseOrCategory_NameContainingIgnoreCase(keyword, keyword);
+        System.out.println("Tìm thấy sản phẩm");
         return ApiResponse.success("Tìm thấy " + products.size() + " kết quả", mapToDto(products));
     }
 
