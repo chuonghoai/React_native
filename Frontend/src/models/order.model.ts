@@ -13,6 +13,10 @@ export type OrderItem = {
   quantity: number;
   price: number;
   product: Product;
+  review?: {
+    rating: number;
+    comment: string;
+  } | null;
 };
 
 export type Order = {

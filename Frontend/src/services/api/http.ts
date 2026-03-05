@@ -49,7 +49,7 @@ async function request<T>(method: HttpMethod, path: string, body?: unknown): Pro
     }
 
     if (error.name === 'AbortError') {
-        throw new Error("Request quá lâu (Timeout). Có thể do ảnh quá nặng.");
+        throw new Error("Timeout.");
     }
 
     if (error instanceof TypeError || error.message?.includes("Network request failed")) {

@@ -2,6 +2,8 @@ package com.example.backend.repositories;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.example.backend.entities.Order;
 import com.example.backend.enums.OrderStatus;
@@ -9,4 +11,11 @@ import com.example.backend.enums.OrderStatus;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserIdOrderByOrderDateDesc(Long userId);
     List<Order> findByStatus(OrderStatus status);
+
+    @Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END " +
+           "FROM Order o JOIN o.orderItems oi " +
+           "WHERE o.user.id = :userId " +
+           "AND o.status = 'DELIVERED' " +
+           "AND oi.product.id = :productId")
+    boolean hasUserPurchasedProduct(@Param("userId") Long userId, @Param("productId") Long productId);
 }

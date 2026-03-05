@@ -50,4 +50,8 @@ public class User {
     
     private String otpCode;
     private LocalDateTime otpExpiration;
+
+    @Column(columnDefinition = "integer default 0")
+    @Builder.Default
+    private Integer rewardPoints = 0;
 }

@@ -32,4 +32,5 @@ export const ENDPOINTS = {
   CREATE_ORDER: "/api/orders/create",
   GET_ORDERS_HISTORY: "/api/orders/history",
   CANCEL_ORDER: "/api/orders/cancel",
+  ADD_REVIEW: "/api/reviews/add",
 } as const;

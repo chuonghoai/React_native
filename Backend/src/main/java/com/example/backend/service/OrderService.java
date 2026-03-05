@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,16 +13,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.OrderItemResponse;
 import com.example.backend.dto.OrderRequest;
+import com.example.backend.dto.OrderResponse;
+import com.example.backend.dto.ReviewDto;
 import com.example.backend.entities.Cart;
 import com.example.backend.entities.CartItem;
 import com.example.backend.entities.Order;
 import com.example.backend.entities.OrderItem;
+import com.example.backend.entities.Review;
 import com.example.backend.entities.User;
 import com.example.backend.enums.OrderStatus;
 import com.example.backend.enums.PaymentMethod;
 import com.example.backend.repositories.CartRepository;
 import com.example.backend.repositories.OrderRepository;
+import com.example.backend.repositories.ReviewRepository;
 import com.example.backend.repositories.UserRepository;
 
 @Service
@@ -30,6 +37,7 @@ public class OrderService {
     @Autowired private CartRepository cartRepository;
     @Autowired private AuthService authService;
     @Autowired private UserRepository userRepository;
+    @Autowired private ReviewRepository reviewRepository;
 
     @Transactional
     public ApiResponse createOrder(OrderRequest request) {
@@ -76,8 +84,40 @@ public class OrderService {
 
     public ApiResponse getMyOrders() {
         Long userId = authService.getCurrentUserId();
+        
         List<Order> orders = orderRepository.findByUserIdOrderByOrderDateDesc(userId);
-        return ApiResponse.success("Lấy danh sách đơn hàng thành công", orders);
+        
+        List<Review> userReviews = reviewRepository.findByUserId(userId);
+        Map<Long, Review> reviewMap = userReviews.stream()
+                .collect(Collectors.toMap(r -> r.getProduct().getId(), r -> r, (r1, r2) -> r1));
+
+        List<OrderResponse> response = orders.stream().map(order -> {
+            List<OrderItemResponse> items = order.getOrderItems().stream().map(oi -> {
+                Review r = reviewMap.get(oi.getProduct().getId());
+                ReviewDto reviewDto = r != null ? new ReviewDto(r.getRating(), r.getComment()) : null;
+                
+                return OrderItemResponse.builder()
+                        .id(oi.getId())
+                        .quantity(oi.getQuantity())
+                        .price(oi.getPrice())
+                        .product(oi.getProduct())
+                        .review(reviewDto)
+                        .build();
+            }).collect(Collectors.toList());
+
+            return OrderResponse.builder()
+                    .id(order.getId())
+                    .orderDate(order.getOrderDate())
+                    .totalPrice(order.getTotalPrice())
+                    .status(order.getStatus())
+                    .paymentMethod(order.getPaymentMethod())
+                    .shippingAddress(order.getShippingAddress())
+                    .shippingPhone(order.getShippingPhone())
+                    .orderItems(items)
+                    .build();
+        }).collect(Collectors.toList());
+
+        return ApiResponse.success("Lấy danh sách đơn hàng thành công", response);
     }
 
     @Transactional
