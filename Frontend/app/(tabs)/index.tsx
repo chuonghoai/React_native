@@ -142,7 +142,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* User's cart/order */}
+        {/* User's cart/order/favorite */}
         <View className="px-4 mb-6">
           <View className="flex-row gap-3">
             {/* Cart button */}
@@ -166,6 +166,20 @@ export default function ProfileScreen() {
               </View>
               <Text className="font-bold text-gray-700">Đơn hàng</Text>
             </TouchableOpacity>
+          </View>
+
+          {/* Favorites button */}
+          <View className="flex-row gap-3">
+            <TouchableOpacity
+              className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center border border-gray-100"
+              onPress={() => router.push("/favorites/favorites")}
+            >
+              <View className="bg-pink-50 p-3 rounded-full mb-2">
+                <Ionicons name="heart" size={24} color="#EC4899" />
+              </View>
+              <Text className="font-bold text-gray-700">Yêu thích</Text>
+            </TouchableOpacity>
+            <View className="flex-1" />
           </View>
         </View>
 
