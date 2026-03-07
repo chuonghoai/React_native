@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .requestMatchers("/vouchers/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/api/reviews/product/**").permitAll()
+                .requestMatchers("/coupons/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             )

@@ -122,19 +122,21 @@ public class OrderService {
         int pointsToUse = request.getRewardPointsUsed() != null ? request.getRewardPointsUsed() : 0;
         if (pointsToUse > 0) {
             int userPoints = user.getRewardPoints() != null ? user.getRewardPoints() : 0;
-            if (pointsToUse > userPoints) {
-                return ApiResponse.error("Bạn không có đủ điểm tích lũy.");
-            }
+            if (pointsToUse > userPoints) return ApiResponse.error("Bạn không có đủ điểm tích lũy.");
             
             double remainingTotal = cartTotal - totalDiscount;
             
+            double pointDiscountValue = pointsToUse / 10.0; 
+            
             if (remainingTotal <= 0) {
                 pointsToUse = 0;
-            } else if (pointsToUse > remainingTotal) {
-                pointsToUse = (int) remainingTotal;
+                pointDiscountValue = 0;
+            } else if (pointDiscountValue > remainingTotal) {
+                pointDiscountValue = remainingTotal;
+                pointsToUse = (int) (remainingTotal * 10); 
             }
             
-            totalDiscount += pointsToUse;
+            totalDiscount += pointDiscountValue;
             user.setRewardPoints(userPoints - pointsToUse);
             userRepository.save(user); 
         }
