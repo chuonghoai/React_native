@@ -14,10 +14,10 @@ export const ENDPOINTS = {
   CHANGE_PASSWORD: "/api/user/change-password",
   REQUEST_CHANGE_EMAIL: "/api/user/request-change-email",
   VERIFY_CHANGE_EMAIL: "/api/user/verify-change-email",
-  
+
   // Products
   GET_PRODUCTS: "/products",
-  SEARCH_PRODUCTS: "/products/search", 
+  SEARCH_PRODUCTS: "/products/search",
   FILTER_PRODUCTS: "/products/category",
   GET_BEST_SELLERS: "/products/best-sellers",
   GET_DISCOUNT_PRODUCTS: "/vouchers",
@@ -37,4 +37,6 @@ export const ENDPOINTS = {
   CANCEL_ORDER: "/api/orders/cancel",
   ADD_REVIEW: "/api/reviews/add",
 
+  // Coupon
+  GET_COUPONS: "/coupons",
 } as const;

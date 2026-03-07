@@ -29,6 +29,7 @@ public class ProductService {
     @Autowired private FavoriteRepository favoriteRepository;
     @Autowired private AuthService authService;
 
+    @Transactional(readOnly = true)
     public ApiResponse getAllProducts(int page, int size, String sortBy, String order) {
         Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         
@@ -96,17 +97,29 @@ public class ProductService {
     }
 
     private List<ProductListResponse> mapToDto(List<Product> products) {
+        LocalDateTime now = LocalDateTime.now();
         return products.stream()
-            .map(p -> ProductListResponse.builder()
-                .id(p.getId())
-                .name(p.getName())
-                .price(p.getPrice())
-                .imageUrl(p.getImageUrl())
-                .category(p.getCategory())
-                .build())
+            .map(p -> {
+                double totalDiscount = p.getVouchers().stream()
+                    .filter(v -> !v.getStartDate().isAfter(now) && !v.getEndDate().isBefore(now))
+                    .mapToDouble(Voucher::getDiscountAmount)
+                    .sum();
+                
+                double finalPrice = p.getPrice() - totalDiscount;
+                if (finalPrice < 0) finalPrice = 0;
+
+                return ProductListResponse.builder()
+                    .id(p.getId())
+                    .name(p.getName())
+                    .price(finalPrice)
+                    .imageUrl(p.getImageUrl())
+                    .category(p.getCategory())
+                    .build();
+            })
             .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ApiResponse searchProducts(String keyword) {
         List<Product> products = 
             productRepository
@@ -115,6 +128,7 @@ public class ProductService {
         return ApiResponse.success("Tìm thấy " + products.size() + " kết quả", mapToDto(products));
     }
 
+    @Transactional(readOnly = true)
     public ApiResponse filterProducts(List<String> categories, int page, int size, String sortBy, String order) {
         Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
@@ -133,12 +147,14 @@ public class ProductService {
         return ApiResponse.success("Lọc thành công", metadata);
     }
 
+    @Transactional(readOnly = true)
     public ApiResponse getTop10BestSellers() {
         List<Product> products = productRepository.findTop10BestSellers(PageRequest.of(0, 10));
         
         return ApiResponse.success("Lấy top 10 bán chạy thành công", mapToDto(products));
     }
 
+    @Transactional(readOnly = true)
     public ApiResponse getSimilarProducts(Long id) {
         Product product = productRepository.findById(id).orElse(null);
         if (product == null) return ApiResponse.error("Không tìm thấy sản phẩm");

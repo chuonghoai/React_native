@@ -18,7 +18,7 @@ public class CartController {
 
     @GetMapping
     public ApiResponse getCart() {
-        return ApiResponse.success("Giỏ hàng", cartService.getMyCart());
+        return cartService.getCartResponse();
     }
 
     @PostMapping("/add")

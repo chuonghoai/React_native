@@ -1,12 +1,11 @@
 import type { LoginRequest, RegisterRequest } from "@/src/models/auth.model";
+import { UserData } from "@/src/models/user.model";
 import { authService } from "@/src/services/auth.service";
 import { userLocal } from "@/src/storage/user.local";
 import { router } from "expo-router";
 import { authStore } from "../stores/auth.store";
 
-type ControllerResult =
-  | { ok: true }
-  | { ok: false; message: string };
+type ControllerResult = { ok: true } | { ok: false; message: string };
 
 function validateRegisterInput(input: RegisterRequest): string | null {
   const username = input.username?.trim();
@@ -71,14 +70,19 @@ export const authController = {
 
   async login(input: LoginRequest): Promise<ControllerResult> {
     const cleanInput: LoginRequest = {
-        username: input.username?.trim(),
-        password: input.password
-    }
+      username: input.username?.trim(),
+      password: input.password,
+    };
 
     const err = validateLoginInput(cleanInput);
     if (err) return { ok: false, message: err };
     try {
-      console.log("Đang đăng nhập với username: " + cleanInput.username + " - password: " + cleanInput.password)
+      console.log(
+        "Đang đăng nhập với username: " +
+          cleanInput.username +
+          " - password: " +
+          cleanInput.password,
+      );
       const res = await authService.login(cleanInput);
 
       if (!res?.success) {
@@ -86,9 +90,7 @@ export const authController = {
       }
 
       const token =
-        (res as any)?.data?.token ??
-        (res as any)?.data?.accessToken ??
-        null;
+        (res as any)?.data?.token ?? (res as any)?.data?.accessToken ?? null;
 
       if (token) {
         await authStore.setToken(token);
@@ -118,7 +120,8 @@ export const authController = {
   async sendForgotOtp(email: string): Promise<ControllerResult> {
     const cleanEmail = email.trim();
     if (!cleanEmail) return { ok: false, message: "Vui lòng nhập email" };
-    if (!isValidEmail(cleanEmail)) return { ok: false, message: "Email không hợp lệ" };
+    if (!isValidEmail(cleanEmail))
+      return { ok: false, message: "Email không hợp lệ" };
 
     try {
       const res = await authService.forgotPassword({ email: cleanEmail });
@@ -138,13 +141,18 @@ export const authController = {
     }
   },
 
-  async resetPassword(input: { email: string; otp: string; newPassword: string }): Promise<ControllerResult> {
+  async resetPassword(input: {
+    email: string;
+    otp: string;
+    newPassword: string;
+  }): Promise<ControllerResult> {
     const email = input.email.trim();
     const otp = input.otp.trim();
     const newPassword = input.newPassword;
 
     if (!email) return { ok: false, message: "Thiếu email" };
-    if (!isValidEmail(email)) return { ok: false, message: "Email không hợp lệ" };
+    if (!isValidEmail(email))
+      return { ok: false, message: "Email không hợp lệ" };
     if (!otp) return { ok: false, message: "Vui lòng nhập OTP" };
     if (!newPassword || newPassword.length < 6) {
     }
@@ -164,6 +172,18 @@ export const authController = {
       return { ok: true };
     } catch (e: any) {
       return { ok: false, message: e?.message || "Không thể kết nối server" };
+    }
+  },
+
+  async getMe(): Promise<{ ok: boolean; data?: UserData; message?: string }> {
+    try {
+      const res = await authService.getMe();
+      if (res?.success && res.data) {
+        return { ok: true, data: res.data };
+      }
+      return { ok: false, message: res?.message || "Lỗi lấy thông tin" };
+    } catch (e: any) {
+      return { ok: false, message: e?.message || "Lỗi kết nối" };
     }
   },
 };

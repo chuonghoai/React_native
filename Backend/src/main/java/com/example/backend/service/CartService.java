@@ -15,6 +15,13 @@ import com.example.backend.repositories.CartRepository;
 import com.example.backend.repositories.ProductRepository;
 import com.example.backend.repositories.UserRepository;
 
+import java.time.LocalDateTime;
+    import java.util.HashMap;
+    import java.util.List;
+    import java.util.Map;
+    import java.util.stream.Collectors;
+    import com.example.backend.entities.Voucher;
+
 @Service
 public class CartService {
     @Autowired private CartRepository cartRepository;
@@ -75,5 +82,44 @@ public class CartService {
                 .ifPresent(item -> item.setQuantity(quantity));
         cartRepository.save(cart);
         return ApiResponse.success("Cập nhật số lượng thành công", null);
+    }
+
+    @Transactional(readOnly = true)
+    public ApiResponse getCartResponse() {
+        Cart cart = getMyCart(); 
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Map<String, Object>> items = cart.getCartItems().stream().map(item -> {
+            Product product = item.getProduct();
+            
+            double discount = product.getVouchers().stream()
+                .filter(v -> !v.getStartDate().isAfter(now) && !v.getEndDate().isBefore(now))
+                .mapToDouble(Voucher::getDiscountAmount)
+                .sum();
+                
+            double actualPrice = product.getPrice() - discount;
+            if (actualPrice < 0) actualPrice = 0;
+
+            Map<String, Object> productMap = new HashMap<>();
+            productMap.put("id", product.getId());
+            productMap.put("name", product.getName());
+            productMap.put("price", actualPrice);
+            productMap.put("originalPrice", product.getPrice());
+            productMap.put("imageUrl", product.getImageUrl());
+            productMap.put("category", product.getCategory());
+
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("id", item.getId());
+            itemMap.put("quantity", item.getQuantity());
+            itemMap.put("product", productMap);
+
+            return itemMap;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", cart.getId());
+        response.put("cartItems", items);
+
+        return ApiResponse.success("Lấy giỏ hàng thành công", response);
     }
 }

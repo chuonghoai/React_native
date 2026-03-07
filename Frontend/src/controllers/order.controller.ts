@@ -1,8 +1,12 @@
 import { Order, OrderRequest } from "@/src/models/order.model";
 import { orderService } from "@/src/services/order.service";
 
-type BaseResult = { ok: true; data?: any; message?: string } | { ok: false; message: string };
-type OrderListResult = { ok: true; data: Order[] } | { ok: false; message: string };
+type BaseResult =
+  | { ok: true; data?: any; message?: string }
+  | { ok: false; message: string };
+type OrderListResult =
+  | { ok: true; data: Order[] }
+  | { ok: false; message: string };
 
 export const orderController = {
   async create(payload: OrderRequest): Promise<BaseResult> {
@@ -33,5 +37,5 @@ export const orderController = {
     } catch (e: any) {
       return { ok: false, message: e.message || "Lỗi kết nối" };
     }
-  }
+  },
 };

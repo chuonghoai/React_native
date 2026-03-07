@@ -13,6 +13,7 @@ public class CouponService {
 
     public ApiResponse getAvailableCoupons() {
         List<Coupon> coupons = couponRepository.findActiveCoupons();
+        System.out.println("Lay danh sach ma giam gia");
         return ApiResponse.success("Lấy danh sách mã giảm giá thành công", coupons);
     }
 }

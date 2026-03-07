@@ -4,9 +4,18 @@ export type OrderRequest = {
   address: string;
   phone: string;
   paymentMethod: string;
+  couponCodes?: string[];
+  rewardPointsUsed?: number;
 };
 
-export type OrderStatus = 'NEW' | 'CONFIRMED' | 'PREPARING' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED' | 'REQUEST_CANCEL';
+export type OrderStatus =
+  | "NEW"
+  | "CONFIRMED"
+  | "PREPARING"
+  | "SHIPPING"
+  | "DELIVERED"
+  | "CANCELLED"
+  | "REQUEST_CANCEL";
 
 export type OrderItem = {
   id: number;
