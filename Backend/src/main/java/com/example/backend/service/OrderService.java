@@ -19,14 +19,17 @@ import com.example.backend.dto.OrderResponse;
 import com.example.backend.dto.ReviewDto;
 import com.example.backend.entities.Cart;
 import com.example.backend.entities.CartItem;
+import com.example.backend.entities.Coupon;
 import com.example.backend.entities.Order;
 import com.example.backend.entities.OrderItem;
 import com.example.backend.entities.Product;
 import com.example.backend.entities.Review;
 import com.example.backend.entities.User;
+import com.example.backend.enums.DiscountType;
 import com.example.backend.enums.OrderStatus;
 import com.example.backend.enums.PaymentMethod;
 import com.example.backend.repositories.CartRepository;
+import com.example.backend.repositories.CouponRepository;
 import com.example.backend.repositories.OrderRepository;
 import com.example.backend.repositories.ProductRepository;
 import com.example.backend.repositories.ReviewRepository;
@@ -41,6 +44,7 @@ public class OrderService {
     @Autowired private UserRepository userRepository;
     @Autowired private ReviewRepository reviewRepository;
     @Autowired private ProductRepository productRepository;
+    @Autowired private CouponRepository couponRepository;
 
     @Transactional
     public ApiResponse createOrder(OrderRequest request) {
@@ -52,32 +56,132 @@ public class OrderService {
             return ApiResponse.error("Giỏ hàng trống");
         }
 
-        double totalPrice = cart.getCartItems().stream()
-                .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
+        LocalDateTime now = LocalDateTime.now();
+        double cartTotal = 0.0;
+
+        for (CartItem item : cart.getCartItems()) {
+            Product product = item.getProduct();
+            
+            double productVoucherDiscount = product.getVouchers().stream()
+                .filter(v -> !v.getStartDate().isAfter(now) && !v.getEndDate().isBefore(now))
+                .mapToDouble(com.example.backend.entities.Voucher::getDiscountAmount)
                 .sum();
+            
+            double actualProductPrice = product.getPrice() - productVoucherDiscount;
+            if (actualProductPrice < 0) actualProductPrice = 0;
+            
+            cartTotal += (actualProductPrice * item.getQuantity());
+        }
+
+        double totalDiscount = 0.0;
+        List<Coupon> validCoupons = new ArrayList<>();
+
+        if (request.getCouponCodes() != null && !request.getCouponCodes().isEmpty()) {
+            for (String code : request.getCouponCodes()) {
+                Coupon coupon = couponRepository.findByCode(code).orElse(null);
+                
+                if (coupon == null) {
+                    return ApiResponse.error("Mã giảm giá " + code + " không tồn tại.");
+                }
+                if (!coupon.getIsActive() || now.isBefore(coupon.getStartDate()) || now.isAfter(coupon.getEndDate())) {
+                    return ApiResponse.error("Mã giảm giá " + code + " không hợp lệ hoặc đã hết hạn.");
+                }
+
+                long userUsedCount = orderRepository.countCouponUsageByUser(userId, coupon.getId());
+                if (userUsedCount >= coupon.getUsageLimitPerUser()) {
+                    return ApiResponse.error("Bạn đã hết lượt sử dụng mã " + code);
+                }
+
+                if (coupon.getUsageLimit() > 0 && coupon.getUsedCount() >= coupon.getUsageLimit()) {
+                    return ApiResponse.error("Mã giảm giá " + code + " đã được sử dụng hết.");
+                }
+
+                if (cartTotal < coupon.getMinOrderValue()) {
+                    return ApiResponse.error("Đơn hàng chưa đạt giá trị tối thiểu (" + coupon.getMinOrderValue() + "đ) để dùng mã " + code);
+                }
+
+                double discountForThisCoupon = 0.0;
+                if (coupon.getDiscountType() == DiscountType.FIXED_AMOUNT) {
+                    discountForThisCoupon = coupon.getDiscountValue();
+                } else if (coupon.getDiscountType() == DiscountType.PERCENTAGE) {
+                    discountForThisCoupon = cartTotal * (coupon.getDiscountValue() / 100.0);
+                    if (coupon.getMaxDiscountAmount() != null && discountForThisCoupon > coupon.getMaxDiscountAmount()) {
+                        discountForThisCoupon = coupon.getMaxDiscountAmount();
+                    }
+                }
+
+                totalDiscount += discountForThisCoupon;
+                validCoupons.add(coupon);
+            }
+        }
+
+        if (totalDiscount > cartTotal) {
+            totalDiscount = cartTotal;
+        }
+
+        int pointsToUse = request.getRewardPointsUsed() != null ? request.getRewardPointsUsed() : 0;
+        if (pointsToUse > 0) {
+            int userPoints = user.getRewardPoints() != null ? user.getRewardPoints() : 0;
+            if (pointsToUse > userPoints) {
+                return ApiResponse.error("Bạn không có đủ điểm tích lũy.");
+            }
+            
+            double remainingTotal = cartTotal - totalDiscount;
+            
+            if (remainingTotal <= 0) {
+                pointsToUse = 0;
+            } else if (pointsToUse > remainingTotal) {
+                pointsToUse = (int) remainingTotal;
+            }
+            
+            totalDiscount += pointsToUse;
+            user.setRewardPoints(userPoints - pointsToUse);
+            userRepository.save(user); 
+        }
+
+        double finalPrice = cartTotal - totalDiscount;
 
         Order order = Order.builder()
                 .user(user)
-                .orderDate(LocalDateTime.now())
+                .orderDate(now)
                 .status(OrderStatus.NEW)
                 .paymentMethod(PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase()))
                 .shippingAddress(request.getAddress())
                 .shippingPhone(request.getPhone())
-                .totalPrice(totalPrice)
+                .totalPrice(finalPrice)
+                .totalDiscount(totalDiscount)
+                .rewardPointsUsed(pointsToUse)
+                .appliedCoupons(validCoupons)
                 .orderItems(new ArrayList<>())
                 .build();
 
         for (CartItem ci : cart.getCartItems()) {
+            Product product = ci.getProduct();
+            
+            double productVoucherDiscount = product.getVouchers().stream()
+                .filter(v -> !v.getStartDate().isAfter(now) && !v.getEndDate().isBefore(now))
+                .mapToDouble(com.example.backend.entities.Voucher::getDiscountAmount)
+                .sum();
+            double actualProductPrice = product.getPrice() - productVoucherDiscount;
+            if (actualProductPrice < 0) actualProductPrice = 0;
+
             OrderItem oi = OrderItem.builder()
                     .order(order)
-                    .product(ci.getProduct())
+                    .product(product)
                     .quantity(ci.getQuantity())
-                    .price(ci.getProduct().getPrice())
+                    .price(actualProductPrice) 
                     .build();
             order.getOrderItems().add(oi);
         }
 
         orderRepository.save(order);
+
+        for (Coupon c : validCoupons) {
+            c.setUsedCount(c.getUsedCount() + 1);
+        }
+        if (!validCoupons.isEmpty()) {
+            couponRepository.saveAll(validCoupons);
+        }
 
         cart.getCartItems().clear();
         cartRepository.save(cart);

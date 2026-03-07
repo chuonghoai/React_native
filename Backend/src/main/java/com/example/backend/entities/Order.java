@@ -1,6 +1,7 @@
 package com.example.backend.entities;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.example.backend.enums.OrderStatus;
@@ -16,6 +17,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -62,4 +65,20 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
+
+    @ManyToMany
+    @JoinTable(
+        name = "order_coupons",
+        joinColumns = @JoinColumn(name = "order_id"),
+        inverseJoinColumns = @JoinColumn(name = "coupon_id")
+    )
+    private List<Coupon> appliedCoupons = new ArrayList<>();
+
+    @Column(columnDefinition = "double default 0")
+    @Builder.Default
+    private Double totalDiscount = 0.0;
+
+    @Column(columnDefinition = "integer default 0")
+    @Builder.Default
+    private Integer rewardPointsUsed = 0;
 }

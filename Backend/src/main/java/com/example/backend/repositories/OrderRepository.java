@@ -18,4 +18,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "AND o.status = 'DELIVERED' " +
            "AND oi.product.id = :productId")
     boolean hasUserPurchasedProduct(@Param("userId") Long userId, @Param("productId") Long productId);
+
+    @Query("SELECT COUNT(o) FROM Order o JOIN o.appliedCoupons c " +
+           "WHERE o.user.id = :userId " +
+           "AND c.id = :couponId " +
+           "AND o.status != 'CANCELLED'")
+    long countCouponUsageByUser(@Param("userId") Long userId, @Param("couponId") Long couponId);
 }

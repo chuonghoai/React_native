@@ -4,7 +4,7 @@ import { userController } from "@/src/controllers/user.controller";
 import type { UserData } from "@/src/models/user.model";
 import { userLocal } from "@/src/storage/user.local";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from "expo-image-picker";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -32,7 +32,7 @@ export default function ProfileScreen() {
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [])
+    }, []),
   );
 
   async function loadData() {
@@ -43,10 +43,10 @@ export default function ProfileScreen() {
 
     try {
       const res = await homeController.loadMe();
-      
+
       if (res.ok && res.data) {
         console.log("Server User Data:", res.data);
-        
+
         setMe(res.data);
       }
     } catch (error) {
@@ -58,7 +58,7 @@ export default function ProfileScreen() {
   }
 
   async function onLogout() {
-     Alert.alert("Đăng xuất", "Bạn có chắc chắn muốn đăng xuất?", [
+    Alert.alert("Đăng xuất", "Bạn có chắc chắn muốn đăng xuất?", [
       { text: "Hủy", style: "cancel" },
       {
         text: "Đồng ý",
@@ -69,7 +69,7 @@ export default function ProfileScreen() {
       },
     ]);
   }
-  
+
   if (loading && !me) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
@@ -83,17 +83,24 @@ export default function ProfileScreen() {
       <ScrollView
         contentContainerStyle={{ paddingBottom: 40 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadData(); }} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              setRefreshing(true);
+              loadData();
+            }}
+          />
         }
       >
-
         {/* User infomation */}
         <View className="bg-white pb-6 pt-4 rounded-b-3xl shadow-sm items-center mb-6">
           {/* Avartar */}
           <View className="relative mb-4">
             <Image
               source={{
-                uri: me?.avatarUrl || `https://ui-avatars.com/api/?name=${me?.fullname || "User"}&background=random&size=200`,
+                uri:
+                  me?.avatarUrl ||
+                  `https://ui-avatars.com/api/?name=${me?.fullname || "User"}&background=random&size=200`,
               }}
               className="w-28 h-28 rounded-full border-4 border-gray-100 bg-gray-200"
             />
@@ -103,7 +110,7 @@ export default function ProfileScreen() {
           <Text className="text-2xl font-bold text-gray-800 mb-1">
             {me?.fullname || "Chưa cập nhật tên"}
           </Text>
-          
+
           {/* Username */}
           <Text className="text-gray-500 font-medium mb-4">
             @{me?.username}
@@ -131,7 +138,7 @@ export default function ProfileScreen() {
               Điểm tích lũy: {me?.rewardPoints || 0}
             </Text>
           </View>
-          
+
           {/* Edit profile button */}
           <TouchableOpacity
             onPress={() => setShowEditProfile(true)}
@@ -148,7 +155,7 @@ export default function ProfileScreen() {
             {/* Cart button */}
             <TouchableOpacity
               className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center border border-gray-100"
-              onPress={() => router.push("/cart/cart")} 
+              onPress={() => router.push("/cart/cart")}
             >
               <View className="bg-blue-50 p-3 rounded-full mb-2">
                 <Ionicons name="cart" size={24} color="#2563EB" />
@@ -188,7 +195,7 @@ export default function ProfileScreen() {
           <Text className="text-gray-500 font-bold mb-3 uppercase text-xs ml-2">
             Cài đặt tài khoản
           </Text>
-          
+
           <View className="bg-white rounded-2xl overflow-hidden shadow-sm">
             {/* Change password button */}
             <TouchableOpacity
@@ -198,7 +205,9 @@ export default function ProfileScreen() {
               <View className="bg-orange-100 p-2 rounded-xl mr-3">
                 <Ionicons name="key" size={20} color="orange" />
               </View>
-              <Text className="flex-1 text-gray-700 font-medium">Đổi mật khẩu</Text>
+              <Text className="flex-1 text-gray-700 font-medium">
+                Đổi mật khẩu
+              </Text>
               <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
             </TouchableOpacity>
 
@@ -295,12 +304,12 @@ function EditProfileModal({ visible, onClose, currentUser, onSuccess }: any) {
       }
     }
 
-    const res = await userController.updateProfile({ 
-      fullname, 
-      phone, 
-      avatarUrl: finalAvatarUrl 
+    const res = await userController.updateProfile({
+      fullname,
+      phone,
+      avatarUrl: finalAvatarUrl,
     });
-    
+
     setLoading(false);
 
     if (res.ok) {
@@ -313,7 +322,11 @@ function EditProfileModal({ visible, onClose, currentUser, onSuccess }: any) {
   }
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+    >
       <View className="flex-1 bg-gray-50">
         <View className="bg-white px-4 py-4 flex-row justify-between items-center border-b border-gray-200 shadow-sm">
           <TouchableOpacity onPress={onClose}>
@@ -321,7 +334,9 @@ function EditProfileModal({ visible, onClose, currentUser, onSuccess }: any) {
           </TouchableOpacity>
           <Text className="font-bold text-lg">Sửa hồ sơ</Text>
           <TouchableOpacity onPress={handleSave} disabled={loading}>
-            <Text className={`text-lg font-bold ${loading ? "text-gray-400" : "text-blue-600"}`}>
+            <Text
+              className={`text-lg font-bold ${loading ? "text-gray-400" : "text-blue-600"}`}
+            >
               {loading ? "Đang lưu..." : "Lưu"}
             </Text>
           </TouchableOpacity>
@@ -330,9 +345,18 @@ function EditProfileModal({ visible, onClose, currentUser, onSuccess }: any) {
         <ScrollView className="p-4">
           {/* AVATAR */}
           <View className="items-center mb-6 mt-4">
-            <TouchableOpacity onPress={pickImage} className="items-center relative">
+            <TouchableOpacity
+              onPress={pickImage}
+              className="items-center relative"
+            >
               <Image
-                source={{ uri: localImageUri || avatarUrl || currentUser?.avatarUrl || "https://ui-avatars.com/api/?name=User" }}
+                source={{
+                  uri:
+                    localImageUri ||
+                    avatarUrl ||
+                    currentUser?.avatarUrl ||
+                    "https://ui-avatars.com/api/?name=User",
+                }}
                 className="w-24 h-24 rounded-full border-2 border-gray-200 mb-2"
               />
               <View className="absolute bottom-2 right-0 bg-blue-600 p-1.5 rounded-full border-2 border-white">
@@ -345,13 +369,15 @@ function EditProfileModal({ visible, onClose, currentUser, onSuccess }: any) {
           <View className="bg-white rounded-xl px-4 py-2 border border-gray-200">
             <View className="py-3 border-b border-gray-100 flex-row items-center">
               <Text className="w-24 text-gray-500">Username</Text>
-              <Text className="flex-1 text-gray-400 font-medium">@{currentUser?.username}</Text>
+              <Text className="flex-1 text-gray-400 font-medium">
+                @{currentUser?.username}
+              </Text>
               <Ionicons name="lock-closed" size={14} color="#9CA3AF" />
             </View>
 
             <View className="py-3 border-b border-gray-100 flex-row items-center">
               <Text className="w-24 text-gray-900 font-medium">Họ tên</Text>
-              <TextInput 
+              <TextInput
                 value={fullname}
                 onChangeText={setFullname}
                 placeholder="Nhập họ tên"
@@ -361,7 +387,7 @@ function EditProfileModal({ visible, onClose, currentUser, onSuccess }: any) {
 
             <View className="py-3 flex-row items-center">
               <Text className="w-24 text-gray-900 font-medium">Số ĐT</Text>
-              <TextInput 
+              <TextInput
                 value={phone}
                 onChangeText={setPhone}
                 placeholder="Nhập số điện thoại"
@@ -370,7 +396,7 @@ function EditProfileModal({ visible, onClose, currentUser, onSuccess }: any) {
               />
             </View>
           </View>
-          
+
           <Text className="text-gray-400 text-xs text-center mt-4">
             Username không thể thay đổi vì lý do định danh.
           </Text>
@@ -386,9 +412,13 @@ function ChangePasswordModal({ visible, onClose }: any) {
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit() {
-    if (!oldPassword || !newPassword) return Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin");
+    if (!oldPassword || !newPassword)
+      return Alert.alert("Lỗi", "Vui lòng nhập đủ thông tin");
     setLoading(true);
-    const res = await userController.changePassword({ oldPassword, newPassword });
+    const res = await userController.changePassword({
+      oldPassword,
+      newPassword,
+    });
     setLoading(false);
     if (res.ok) {
       Alert.alert("Thành công", "Đổi mật khẩu thành công");
@@ -406,16 +436,36 @@ function ChangePasswordModal({ visible, onClose }: any) {
         <View className="bg-white rounded-t-3xl p-6 h-[70%]">
           <View className="flex-row justify-between items-center mb-6">
             <Text className="text-xl font-bold">Đổi mật khẩu</Text>
-            <TouchableOpacity onPress={onClose}><Ionicons name="close-circle" size={30} color="#E5E7EB" /></TouchableOpacity>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close-circle" size={30} color="#E5E7EB" />
+            </TouchableOpacity>
           </View>
           <View className="bg-gray-50 p-4 rounded-xl mb-4 border border-gray-100">
-             <TextInput placeholder="Mật khẩu cũ" secureTextEntry value={oldPassword} onChangeText={setOldPassword} className="py-2" />
+            <TextInput
+              placeholder="Mật khẩu cũ"
+              secureTextEntry
+              value={oldPassword}
+              onChangeText={setOldPassword}
+              className="py-2"
+            />
           </View>
           <View className="bg-gray-50 p-4 rounded-xl mb-6 border border-gray-100">
-             <TextInput placeholder="Mật khẩu mới" secureTextEntry value={newPassword} onChangeText={setNewPassword} className="py-2" />
+            <TextInput
+              placeholder="Mật khẩu mới"
+              secureTextEntry
+              value={newPassword}
+              onChangeText={setNewPassword}
+              className="py-2"
+            />
           </View>
-          <TouchableOpacity onPress={handleSubmit} disabled={loading} className="bg-blue-600 py-4 rounded-xl items-center">
-            <Text className="text-white font-bold text-lg">{loading ? "Đang xử lý..." : "Xác nhận đổi"}</Text>
+          <TouchableOpacity
+            onPress={handleSubmit}
+            disabled={loading}
+            className="bg-blue-600 py-4 rounded-xl items-center"
+          >
+            <Text className="text-white font-bold text-lg">
+              {loading ? "Đang xử lý..." : "Xác nhận đổi"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -429,15 +479,24 @@ function ChangeEmailModal({ visible, onClose, currentEmail }: any) {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { if (visible) { setStep(1); setNewEmail(""); setOtp(""); } }, [visible]);
+  useEffect(() => {
+    if (visible) {
+      setStep(1);
+      setNewEmail("");
+      setOtp("");
+    }
+  }, [visible]);
 
   async function handleSendOtp() {
-    if (!newEmail || newEmail === currentEmail) return Alert.alert("Lỗi", "Email không hợp lệ");
+    if (!newEmail || newEmail === currentEmail)
+      return Alert.alert("Lỗi", "Email không hợp lệ");
     setLoading(true);
     const res = await userController.requestChangeEmail(newEmail);
     setLoading(false);
-    if (res.ok) { setStep(2); Alert.alert("Kiểm tra email", `Đã gửi OTP tới ${newEmail}`); } 
-    else Alert.alert("Lỗi", res.message);
+    if (res.ok) {
+      setStep(2);
+      Alert.alert("Kiểm tra email", `Đã gửi OTP tới ${newEmail}`);
+    } else Alert.alert("Lỗi", res.message);
   }
 
   async function handleVerify() {
@@ -445,8 +504,10 @@ function ChangeEmailModal({ visible, onClose, currentEmail }: any) {
     setLoading(true);
     const res = await userController.verifyChangeEmail({ newEmail, otp });
     setLoading(false);
-    if (res.ok) { Alert.alert("Thành công", "Email đã được thay đổi!"); onClose(); } 
-    else Alert.alert("Lỗi", res.message);
+    if (res.ok) {
+      Alert.alert("Thành công", "Email đã được thay đổi!");
+      onClose();
+    } else Alert.alert("Lỗi", res.message);
   }
 
   return (
@@ -454,21 +515,59 @@ function ChangeEmailModal({ visible, onClose, currentEmail }: any) {
       <View className="flex-1 bg-black/40 justify-end">
         <View className="bg-white rounded-t-3xl p-6 h-[70%]">
           <View className="flex-row justify-between items-center mb-6">
-            <Text className="text-xl font-bold">{step === 1 ? "Nhập Email mới" : "Xác thực OTP"}</Text>
-            <TouchableOpacity onPress={onClose}><Ionicons name="close-circle" size={30} color="#E5E7EB" /></TouchableOpacity>
+            <Text className="text-xl font-bold">
+              {step === 1 ? "Nhập Email mới" : "Xác thực OTP"}
+            </Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close-circle" size={30} color="#E5E7EB" />
+            </TouchableOpacity>
           </View>
 
           {step === 1 ? (
             <>
-              <Text className="text-gray-500 mb-4">Email hiện tại: {currentEmail}</Text>
-              <TextInput placeholder="Email mới..." value={newEmail} onChangeText={setNewEmail} className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-6" autoCapitalize="none" keyboardType="email-address" />
-              <TouchableOpacity onPress={handleSendOtp} disabled={loading} className="bg-blue-600 py-4 rounded-xl items-center"><Text className="text-white font-bold text-lg">{loading ? "Đang gửi..." : "Tiếp tục"}</Text></TouchableOpacity>
+              <Text className="text-gray-500 mb-4">
+                Email hiện tại: {currentEmail}
+              </Text>
+              <TextInput
+                placeholder="Email mới..."
+                value={newEmail}
+                onChangeText={setNewEmail}
+                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-6"
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+              <TouchableOpacity
+                onPress={handleSendOtp}
+                disabled={loading}
+                className="bg-blue-600 py-4 rounded-xl items-center"
+              >
+                <Text className="text-white font-bold text-lg">
+                  {loading ? "Đang gửi..." : "Tiếp tục"}
+                </Text>
+              </TouchableOpacity>
             </>
           ) : (
             <>
-              <Text className="text-center text-gray-500 mb-4">Nhập mã 6 số gửi về <Text className="font-bold text-black">{newEmail}</Text></Text>
-              <TextInput placeholder="OTP" value={otp} onChangeText={setOtp} keyboardType="number-pad" className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-6 text-center text-2xl tracking-widest font-bold" />
-              <TouchableOpacity onPress={handleVerify} disabled={loading} className="bg-green-600 py-4 rounded-xl items-center"><Text className="text-white font-bold text-lg">{loading ? "Xác thực..." : "Hoàn tất"}</Text></TouchableOpacity>
+              <Text className="text-center text-gray-500 mb-4">
+                Nhập mã 6 số gửi về{" "}
+                <Text className="font-bold text-black">{newEmail}</Text>
+              </Text>
+              <TextInput
+                placeholder="OTP"
+                value={otp}
+                onChangeText={setOtp}
+                keyboardType="number-pad"
+                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-6 text-center text-2xl tracking-widest font-bold"
+              />
+              <TouchableOpacity
+                onPress={handleVerify}
+                disabled={loading}
+                className="bg-green-600 py-4 rounded-xl items-center"
+              >
+                <Text className="text-white font-bold text-lg">
+                  {loading ? "Xác thực..." : "Hoàn tất"}
+                </Text>
+              </TouchableOpacity>
             </>
           )}
         </View>
