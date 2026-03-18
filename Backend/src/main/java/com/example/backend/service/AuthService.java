@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.JwtUtil;
+import com.example.backend.controller.AuthController;
 import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.ChangePasswordRequest;
 import com.example.backend.dto.LoginResponse;
@@ -26,14 +29,15 @@ import com.example.backend.dto.UpdateProfileRequest;
 import com.example.backend.dto.UserDto;
 import com.example.backend.dto.UserMeResponse;
 import com.example.backend.dto.VerifyChangeEmailRequest;
+import com.example.backend.dto.VerifyOtpRequest;
 import com.example.backend.entities.Category;
 import com.example.backend.entities.User;
 import com.example.backend.repositories.CategoryRepository;
 import com.example.backend.repositories.UserRepository;
 
-
 @Service
 public class AuthService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired private UserRepository userRepository;
     @Autowired private CategoryRepository categoryRepository;
@@ -65,16 +69,26 @@ public class AuthService {
         return ApiResponse.success("Đăng ký thành công. Vui lòng kiểm tra email để lấy OTP.", null);
     }
 
-    public ApiResponse verifyAccount(String email, String otp) {
-        User user = userRepository.findByEmail(email).orElse(null);
+    public ApiResponse verifyAccount(VerifyOtpRequest request) {
+        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
         if (user == null) return ApiResponse.error("Email không tồn tại");
 
-        if (!user.getOtpCode().equals(otp) || LocalDateTime.now().isAfter(user.getOtpExpiration())) {
+        if (user.getOtpCode() == null
+                || user.getOtpExpiration() == null
+                || !user.getOtpCode().equals(request.getOtp())
+                || LocalDateTime.now().isAfter(user.getOtpExpiration())) {
             return ApiResponse.error("OTP không đúng hoặc đã hết hạn");
         }
 
+        if (request.getFullname() != null) user.setFullname(request.getFullname());
+        if (request.getPhone() != null) user.setPhone(request.getPhone());
+        if (request.getAvatarUrl() != null) user.setAvatarUrl(request.getAvatarUrl());
+        
         user.setOtpCode(null);
+        user.setOtpExpiration(null);
         userRepository.save(user);
+
+        logger.info("Thêm thông tin thành công");
         
         return ApiResponse.success("Kích hoạt tài khoản thành công!", null);
     }
@@ -98,6 +112,7 @@ public class AuthService {
                 .token(token)
                 .user(userDto)
                 .build();
+        logger.info(loginResponse.toString());
 
         return ApiResponse.success("Đăng nhập thành công", loginResponse);
     }
@@ -126,7 +141,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setOtpCode(null);
         userRepository.save(user);
-        System.out.println("Dat lai mat khau thanh cong");
+        logger.info("Dat lai mat khau thanh cong");
 
         return ApiResponse.success("Đổi mật khẩu thành công. Hãy đăng nhập lại.", null);
     }

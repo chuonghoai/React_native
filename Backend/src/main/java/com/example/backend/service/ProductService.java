@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.backend.controller.AuthController;
 import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.ProductListResponse;
 import com.example.backend.entities.Product;
@@ -23,6 +26,7 @@ import com.example.backend.repositories.ReviewRepository;
 
 @Service
 public class ProductService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired private ProductRepository productRepository;
     @Autowired private ReviewRepository reviewRepository;
@@ -124,7 +128,7 @@ public class ProductService {
         List<Product> products = 
             productRepository
             .findByNameContainingIgnoreCaseOrCategory_NameContainingIgnoreCase(keyword, keyword);
-        System.out.println("Tìm thấy sản phẩm");
+        logger.info("Tìm thấy sản phẩm");
         return ApiResponse.success("Tìm thấy " + products.size() + " kết quả", mapToDto(products));
     }
 

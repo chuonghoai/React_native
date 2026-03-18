@@ -1,5 +1,7 @@
 package com.example.backend.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/auth")
 @CrossOrigin
 public class AuthController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired private AuthService authService;
     @Autowired private RateLimitingService rateLimitingService;
@@ -33,6 +36,7 @@ public class AuthController {
     // API 1: Đăng ký
     @PostMapping("/register")
     public ApiResponse register(@Valid @RequestBody RegisterRequest request) {
+        logger.info("Dang ky tai khoan: " + request.getEmail());
         System.out.println("Dang ky tai khoan: " + request.getEmail());
         try {
             return authService.register(request.getUsername(), request.getPassword(), request.getEmail());
@@ -45,7 +49,7 @@ public class AuthController {
     @PostMapping("/verify-otp")
     public ApiResponse verifyOtp(@RequestBody VerifyOtpRequest request) {
         try {
-            return authService.verifyAccount(request.getEmail(), request.getOtp());
+            return authService.verifyAccount(request);
         } catch (Exception e) {
             return ApiResponse.error("Lỗi Server: " + e.getMessage());
         }
@@ -56,7 +60,7 @@ public class AuthController {
     public ApiResponse login(@RequestBody LoginRequest request, HttpServletRequest servletRequest) { 
         String clientIp = servletRequest.getRemoteAddr();
         Bucket bucket = rateLimitingService.resolveBucket(clientIp);
-        System.out.println("Nhan yeu cau dang nhap: " + request.getUsername() + " - " + request.getPassword());
+        logger.info("Nhan yeu cau dang nhap: " + request.getUsername() + " - " + request.getPassword());
 
         if (bucket.tryConsume(1)) {
             try {

@@ -7,6 +7,10 @@ export type RegisterRequest = {
 export type VerifyOtpRequest = {
   email: string;
   otp: string;
+  fullname?: string;
+  phone?: string;
+  avatarUrl?: string;
+  avatar?: string;
 };
 
 export type LoginRequest = {

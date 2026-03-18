@@ -7,11 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.backend.controller.AuthController;
 import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.CashFlowStat;
 import com.example.backend.dto.OrderItemResponse;
@@ -38,6 +41,8 @@ import com.example.backend.repositories.UserRepository;
 
 @Service
 public class OrderService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    
     @Autowired private OrderRepository orderRepository;
     @Autowired private CartService cartService;
     @Autowired private CartRepository cartRepository;
@@ -269,7 +274,7 @@ public class OrderService {
             if (minutesElapsed >= 30) {
                 order.setStatus(OrderStatus.CONFIRMED);
                 orderRepository.save(order);
-                System.out.println("Auto confirmed order ID: " + order.getId());
+                logger.info("Auto confirmed order ID: " + order.getId());
             }
         }
     }

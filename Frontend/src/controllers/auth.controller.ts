@@ -52,7 +52,6 @@ export const authController = {
       const res = await authService.register(cleanInput);
 
       if (res?.success) {
-        router.replace("/(tabs)");
         return { ok: true };
       }
 

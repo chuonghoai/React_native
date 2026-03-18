@@ -17,6 +17,28 @@ export const authService = {
   },
 
   verifyOtp(payload: VerifyOtpRequest) {
+    if (payload.avatar) {
+      const formData = new FormData();
+      formData.append("email", payload.email);
+      formData.append("otp", payload.otp);
+
+      if (payload.fullname) formData.append("fullname", payload.fullname);
+      if (payload.phone) formData.append("phone", payload.phone);
+      if (payload.avatarUrl) formData.append("avatarUrl", payload.avatarUrl);
+
+      const filename = payload.avatar.split("/").pop() || "avatar.jpg";
+      const extension = /\.(\w+)$/.exec(filename)?.[1]?.toLowerCase();
+      const type = extension ? `image/${extension === "jpg" ? "jpeg" : extension}` : "image/jpeg";
+
+      formData.append("file", {
+        uri: payload.avatar,
+        name: filename,
+        type,
+      } as any);
+
+      return http.upload<ApiResponse>(ENDPOINTS.VERIFY_OTP, formData);
+    }
+
     return http.post<ApiResponse>(ENDPOINTS.VERIFY_OTP, payload);
   },
 
