@@ -1,12 +1,11 @@
 import { homeController } from "@/src/controllers/home.controller"; // Import Controller
+import { websocketService } from "@/src/services/websocket";
 import { authStore } from "@/src/stores/auth.store";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 export default function Index() {
-  const [loading, setLoading] = useState(true);
-  
   useEffect(() => {
     (async () => {
       try {
@@ -17,18 +16,20 @@ export default function Index() {
           const res = await homeController.loadMe();
           
           if (res.ok) {
+            websocketService.connect(token);
             router.replace("/(tabs)/home");
           } else {
+            websocketService.disconnect();
             await authStore.clear();
             router.replace("/(auth)/login");
           }
         } else {
+          websocketService.disconnect();
           router.replace("/(auth)/login");
         }
-      } catch (e) {
+      } catch {
+        websocketService.disconnect();
         router.replace("/(auth)/login");
-      } finally {
-        setLoading(false);
       }
     })();
   }, []);

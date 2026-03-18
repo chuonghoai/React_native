@@ -26,6 +26,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/ws").permitAll()
+                .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/products/**").permitAll()
                 .requestMatchers("/vouchers/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()

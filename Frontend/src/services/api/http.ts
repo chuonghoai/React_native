@@ -1,4 +1,5 @@
 import { ENV } from "@/src/constants/env";
+import { websocketService } from "@/src/services/websocket";
 import { authStore } from "@/src/stores/auth.store";
 import { router } from "expo-router";
 
@@ -22,47 +23,47 @@ async function request<T>(method: HttpMethod, path: string, body?: unknown): Pro
       body: body ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
-    
+
     clearTimeout(timeoutId);
 
     if (res.status === 401 || res.status === 403) {
-        console.log("Token không hợp lệ");
-        await authStore.clear();
-        router.replace("/(auth)/login");
-        throw new Error("Phiên đăng nhập hết hạn");
+      console.log("Token khong hop le");
+      websocketService.disconnect();
+      await authStore.clear();
+      router.replace("/(auth)/login");
+      throw new Error("Phien dang nhap het han");
     }
 
     if (!res.ok) {
-        const errorJson = await res.json().catch(() => null);
-        const msg = errorJson?.message ?? `Lỗi HTTP ${res.status}`;
-        throw new Error(msg);
+      const errorJson = await res.json().catch(() => null);
+      const msg = errorJson?.message ?? `Loi HTTP ${res.status}`;
+      throw new Error(msg);
     }
 
     const json = await res.json();
     return json as T;
-
   } catch (error: any) {
     console.log("HTTP Error Detail:", error.message);
 
-    if (error.name === 'RangeError' && error.message.includes('status provided (0)')) {
-         throw new Error("Dữ liệu quá tải hoặc mất kết nối Server.");
+    if (error.name === "RangeError" && error.message.includes("status provided (0)")) {
+      throw new Error("Du lieu qua tai hoac mat ket noi Server.");
     }
 
-    if (error.name === 'AbortError') {
-        throw new Error("Timeout.");
+    if (error.name === "AbortError") {
+      throw new Error("Timeout.");
     }
 
     if (error instanceof TypeError || error.message?.includes("Network request failed")) {
-         throw new Error("Không thể kết nối đến Server.");
+      throw new Error("Khong the ket noi den Server.");
     }
-    
+
     throw error;
   }
 }
 
 async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
   const token = authStore.getToken();
-  const headers: Record<string, string> = {}; 
+  const headers: Record<string, string> = {};
 
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -74,14 +75,15 @@ async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
     });
 
     if (res.status === 401 || res.status === 403) {
+      websocketService.disconnect();
       await authStore.clear();
       router.replace("/(auth)/login");
-      throw new Error("Phiên đăng nhập hết hạn");
+      throw new Error("Phien dang nhap het han");
     }
 
     if (!res.ok) {
       const errorJson = await res.json().catch(() => null);
-      throw new Error(errorJson?.message ?? `Lỗi HTTP ${res.status}`);
+      throw new Error(errorJson?.message ?? `Loi HTTP ${res.status}`);
     }
 
     return (await res.json()) as T;

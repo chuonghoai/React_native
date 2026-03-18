@@ -4,6 +4,7 @@ import { productController } from "@/src/controllers/product.controller";
 import { reviewController } from "@/src/controllers/review.controller";
 import { Product, ProductDetail } from "@/src/models/product.model";
 import { Review } from "@/src/models/review.model";
+import { websocketService } from "@/src/services/websocket";
 import { viewedLocal } from "@/src/storage/viewed.local";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -35,12 +36,65 @@ export default function ProductDetailScreen() {
     }
   }, [id]);
 
+  const mergeReviews = (incomingReviews: Review[], currentReviews: Review[] = []) => {
+    const reviewMap = new Map<number, Review>();
+
+    [...incomingReviews, ...currentReviews].forEach((review) => {
+      reviewMap.set(review.id, review);
+    });
+
+    return Array.from(reviewMap.values()).sort(
+      (firstReview, secondReview) =>
+        new Date(secondReview.createdAt).getTime() - new Date(firstReview.createdAt).getTime()
+    );
+  };
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    const productId = Number(id);
+
+    return websocketService.subscribe<Review>(
+      `/topic/reviews/product/${productId}`,
+      (incomingReview) => {
+        let shouldIncreaseReviewCount = false;
+
+        setReviews((currentReviews) => {
+          if (currentReviews.some((review) => review.id === incomingReview.id)) {
+            return currentReviews;
+          }
+
+          shouldIncreaseReviewCount = true;
+          return [incomingReview, ...currentReviews];
+        });
+
+        if (shouldIncreaseReviewCount) {
+          setProduct((currentProduct) => {
+            if (!currentProduct) {
+              return currentProduct;
+            }
+
+            return {
+              ...currentProduct,
+              reviewCount: (currentProduct.reviewCount ?? 0) + 1,
+            };
+          });
+        }
+      }
+    );
+  }, [id]);
+
   const loadData = async (productId: number) => {
     setLoading(true);
     
     const res = await productController.get(productId);
     if (res.ok && res.data) {
-      setProduct(res.data);
+      setProduct((currentProduct) => ({
+        ...res.data,
+        reviewCount: Math.max(res.data.reviewCount ?? 0, currentProduct?.reviewCount ?? 0),
+      }));
       setIsFavorite(res.data.isFavorite || false);
       
       viewedLocal.add({
@@ -53,7 +107,9 @@ export default function ProductDetailScreen() {
     }
 
     const reviewRes = await reviewController.getProductReviews(productId);
-    if (reviewRes.ok && reviewRes.data) setReviews(reviewRes.data);
+    if (reviewRes.ok && reviewRes.data) {
+      setReviews((currentReviews) => mergeReviews(reviewRes.data ?? [], currentReviews));
+    }
 
     const similarRes = await productController.getSimilar(productId);
     if (similarRes.ok && similarRes.data) setSimilarProducts(similarRes.data);

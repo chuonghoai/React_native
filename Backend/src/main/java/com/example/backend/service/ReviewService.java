@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +32,9 @@ public class ReviewService {
     @Autowired private ProductRepository productRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private AuthService authService;
+    @Autowired private SimpMessagingTemplate messagingTemplate;
 
-    private static final int POINTS_PER_REVIEW = 100; 
+    private static final int POINTS_PER_REVIEW = 100;
 
     @Transactional
     public ApiResponse addReview(ReviewRequest request) {
@@ -50,40 +52,42 @@ public class ReviewService {
             return ApiResponse.error("Bạn đã đánh giá sản phẩm này rồi.");
         }
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Lỗi xác thực người dùng"));
-        Product product = productRepository.findById(request.getProductId()).orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Lỗi xác thực người dùng"));
+        Product product = productRepository.findById(request.getProductId())
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
         Review review = Review.builder()
-                .rating(request.getRating())
-                .comment(request.getComment())
-                .createdAt(LocalDateTime.now())
-                .user(user)
-                .product(product)
-                .build();
+            .rating(request.getRating())
+            .comment(request.getComment())
+            .createdAt(LocalDateTime.now())
+            .user(user)
+            .product(product)
+            .build();
         reviewRepository.save(review);
 
         int currentPoints = user.getRewardPoints() != null ? user.getRewardPoints() : 0;
         user.setRewardPoints(currentPoints + POINTS_PER_REVIEW);
         userRepository.save(user);
 
-        return ApiResponse.success("Đánh giá thành công! Bạn được cộng " + POINTS_PER_REVIEW + " điểm tích lũy.", null);
+        ReviewResponse reviewResponse = mapToReviewResponse(review);
+        messagingTemplate.convertAndSend("/topic/reviews/product/" + request.getProductId(), reviewResponse);
+
+        return ApiResponse.success(
+            "Đánh giá thành công! Bạn được cộng " + POINTS_PER_REVIEW + " điểm tích lũy.",
+            reviewResponse
+        );
     }
 
     public ApiResponse getProductReviews(Long productId, int page, int size) {
         Page<Review> reviewPage = reviewRepository.findByProductIdOrderByCreatedAtDesc(
-            productId, PageRequest.of(page, size)
+            productId,
+            PageRequest.of(page, size)
         );
-        
-        List<ReviewResponse> responseList = reviewPage.getContent().stream().map(r -> 
-            ReviewResponse.builder()
-                .id(r.getId())
-                .fullname(r.getUser().getFullname() != null ? r.getUser().getFullname() : r.getUser().getUsername())
-                .avatarUrl(r.getUser().getAvatarUrl())
-                .rating(r.getRating())
-                .comment(r.getComment())
-                .createdAt(r.getCreatedAt())
-                .build()
-        ).collect(Collectors.toList());
+
+        List<ReviewResponse> responseList = reviewPage.getContent().stream()
+            .map(this::mapToReviewResponse)
+            .collect(Collectors.toList());
 
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("content", responseList);
@@ -92,5 +96,18 @@ public class ReviewService {
         metadata.put("totalElements", reviewPage.getTotalElements());
 
         return ApiResponse.success("Lấy danh sách đánh giá thành công", metadata);
+    }
+
+    private ReviewResponse mapToReviewResponse(Review review) {
+        return ReviewResponse.builder()
+            .id(review.getId())
+            .fullname(review.getUser().getFullname() != null
+                ? review.getUser().getFullname()
+                : review.getUser().getUsername())
+            .avatarUrl(review.getUser().getAvatarUrl())
+            .rating(review.getRating())
+            .comment(review.getComment())
+            .createdAt(review.getCreatedAt())
+            .build();
     }
 }

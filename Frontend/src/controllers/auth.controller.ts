@@ -1,6 +1,7 @@
 import type { LoginRequest, RegisterRequest } from "@/src/models/auth.model";
 import { UserData } from "@/src/models/user.model";
 import { authService } from "@/src/services/auth.service";
+import { websocketService } from "@/src/services/websocket";
 import { userLocal } from "@/src/storage/user.local";
 import { router } from "expo-router";
 import { authStore } from "../stores/auth.store";
@@ -93,6 +94,7 @@ export const authController = {
 
       if (token) {
         await authStore.setToken(token);
+        websocketService.connect(token);
       }
 
       router.replace("/(tabs)");
@@ -104,6 +106,7 @@ export const authController = {
 
   async logout(): Promise<ControllerResult> {
     try {
+      websocketService.disconnect();
       await authService.logout().catch(() => null);
 
       await userLocal.clear();
