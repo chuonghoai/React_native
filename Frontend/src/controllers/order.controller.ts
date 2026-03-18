@@ -1,4 +1,4 @@
-import { Order, OrderRequest } from "@/src/models/order.model";
+import { CashFlowStat, Order, OrderRequest } from "@/src/models/order.model";
 import { orderService } from "@/src/services/order.service";
 
 type BaseResult =
@@ -34,6 +34,20 @@ export const orderController = {
       const res = await orderService.cancelOrder(orderId);
       if (res.success) return { ok: true, message: res.message };
       return { ok: false, message: res.message || "Không thể hủy đơn" };
+    } catch (e: any) {
+      return { ok: false, message: e.message || "Lỗi kết nối" };
+    }
+  },
+
+  async getStatistics(): Promise<{
+    ok: boolean;
+    data?: CashFlowStat[];
+    message?: string;
+  }> {
+    try {
+      const res = await orderService.getStatistics();
+      if (res.success && res.data) return { ok: true, data: res.data };
+      return { ok: false, message: res.message };
     } catch (e: any) {
       return { ok: false, message: e.message || "Lỗi kết nối" };
     }

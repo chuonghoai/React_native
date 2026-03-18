@@ -36,6 +36,7 @@ export const ENDPOINTS = {
   GET_ORDERS_HISTORY: "/api/orders/history",
   CANCEL_ORDER: "/api/orders/cancel",
   ADD_REVIEW: "/api/reviews/add",
+  GET_ORDER_STATISTICS: "/api/orders/statistics",
 
   // Coupon
   GET_COUPONS: "/coupons",

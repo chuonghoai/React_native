@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.CashFlowStat;
 import com.example.backend.dto.OrderItemResponse;
 import com.example.backend.dto.OrderRequest;
 import com.example.backend.dto.OrderResponse;
@@ -292,5 +293,11 @@ public class OrderService {
         order.setStatus(newStatus);
         orderRepository.save(order);
         return ApiResponse.success("Cập nhật trạng thái thành công", null);
+    }
+
+    public ApiResponse getMyStatistics() {
+        Long userId = authService.getCurrentUserId();
+        List<CashFlowStat> stats = orderRepository.getCashFlowStatistics(userId);
+        return ApiResponse.success("Lấy thống kê dòng tiền thành công", stats);
     }
 }

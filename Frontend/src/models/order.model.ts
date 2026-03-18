@@ -38,3 +38,9 @@ export type Order = {
   shippingPhone: string;
   orderItems: OrderItem[];
 };
+
+export type CashFlowStat = {
+  status: string;
+  totalAmount: number;
+  orderCount: number;
+};

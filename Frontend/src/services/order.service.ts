@@ -1,5 +1,5 @@
 import { ApiResponse } from "@/src/models/api.model";
-import { Order, OrderRequest } from "@/src/models/order.model";
+import { CashFlowStat, Order, OrderRequest } from "@/src/models/order.model";
 import { ENDPOINTS } from "@/src/services/api/endpoints";
 import { http } from "@/src/services/api/http";
 
@@ -14,5 +14,11 @@ export const orderService = {
 
   cancelOrder(orderId: number) {
     return http.post<ApiResponse>(`${ENDPOINTS.CANCEL_ORDER}/${orderId}`);
-  }
+  },
+
+  getStatistics() {
+    return http.get<ApiResponse<CashFlowStat[]>>(
+      ENDPOINTS.GET_ORDER_STATISTICS,
+    );
+  },
 };

@@ -46,4 +46,9 @@ public class OrderController {
     public ApiResponse updateStatus(@PathVariable Long id, @RequestParam OrderStatus status) {
         return orderService.updateOrderStatus(id, status);
     }
+
+    @GetMapping("/statistics")
+    public ApiResponse getMyStatistics() {
+        return orderService.getMyStatistics();
+    }
 }

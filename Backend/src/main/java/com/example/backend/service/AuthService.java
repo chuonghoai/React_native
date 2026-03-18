@@ -126,6 +126,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setOtpCode(null);
         userRepository.save(user);
+        System.out.println("Dat lai mat khau thanh cong");
 
         return ApiResponse.success("Đổi mật khẩu thành công. Hãy đăng nhập lại.", null);
     }

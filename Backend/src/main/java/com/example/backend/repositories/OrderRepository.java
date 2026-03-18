@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.example.backend.dto.CashFlowStat;
 import com.example.backend.entities.Order;
 import com.example.backend.enums.OrderStatus;
 
@@ -24,4 +25,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "AND c.id = :couponId " +
            "AND o.status != 'CANCELLED'")
     long countCouponUsageByUser(@Param("userId") Long userId, @Param("couponId") Long couponId);
+
+    @Query("SELECT new com.example.backend.dto.CashFlowStat(CAST(o.status AS string), SUM(o.totalPrice), COUNT(o)) " +
+           "FROM Order o WHERE o.user.id = :userId " +
+           "GROUP BY o.status")
+    List<CashFlowStat> getCashFlowStatistics(@Param("userId") Long userId);
 }

@@ -33,6 +33,7 @@ public class AuthController {
     // API 1: Đăng ký
     @PostMapping("/register")
     public ApiResponse register(@Valid @RequestBody RegisterRequest request) {
+        System.out.println("Dang ky tai khoan: " + request.getEmail());
         try {
             return authService.register(request.getUsername(), request.getPassword(), request.getEmail());
         } catch (Exception e) {
@@ -55,6 +56,7 @@ public class AuthController {
     public ApiResponse login(@RequestBody LoginRequest request, HttpServletRequest servletRequest) { 
         String clientIp = servletRequest.getRemoteAddr();
         Bucket bucket = rateLimitingService.resolveBucket(clientIp);
+        System.out.println("Nhan yeu cau dang nhap: " + request.getUsername() + " - " + request.getPassword());
 
         if (bucket.tryConsume(1)) {
             try {
