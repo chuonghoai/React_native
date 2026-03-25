@@ -23,15 +23,16 @@ import io.github.bucket4j.Bucket;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    @Autowired private AuthService authService;
-    @Autowired private RateLimitingService rateLimitingService;
+    @Autowired
+    private AuthService authService;
+    @Autowired
+    private RateLimitingService rateLimitingService;
 
     // API 1: Đăng ký
     @PostMapping("/register")
@@ -57,7 +58,7 @@ public class AuthController {
 
     // API 3: Đăng nhập
     @PostMapping("/login")
-    public ApiResponse login(@RequestBody LoginRequest request, HttpServletRequest servletRequest) { 
+    public ApiResponse login(@RequestBody LoginRequest request, HttpServletRequest servletRequest) {
         String clientIp = servletRequest.getRemoteAddr();
         Bucket bucket = rateLimitingService.resolveBucket(clientIp);
         logger.info("Nhan yeu cau dang nhap: " + request.getUsername() + " - " + request.getPassword());
@@ -69,13 +70,13 @@ public class AuthController {
                 return ApiResponse.error("Lỗi: " + e.getMessage());
             }
         } else {
-            return ApiResponse.error("Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau 15 phút.");
+            return ApiResponse.error("Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau.");
         }
     }
 
     // API 4: Quên mật khẩu
     @PostMapping("/forgot-password")
-    public ApiResponse forgotPassword(@RequestBody ForgotPasswordRequest request) { 
+    public ApiResponse forgotPassword(@RequestBody ForgotPasswordRequest request) {
         return authService.forgotPassword(request.getEmail());
     }
 
@@ -107,7 +108,7 @@ public class AuthController {
         try {
             return authService.getMe();
         } catch (Exception e) {
-            return ApiResponse.error("Lỗi: "+ e.getMessage());
+            return ApiResponse.error("Lỗi: " + e.getMessage());
         }
     }
 }

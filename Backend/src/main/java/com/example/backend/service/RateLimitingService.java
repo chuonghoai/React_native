@@ -12,7 +12,7 @@ import io.github.bucket4j.Refill;
 
 @Service
 public class RateLimitingService {
-    
+
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
 
     public Bucket resolveBucket(String key) {
@@ -20,7 +20,7 @@ public class RateLimitingService {
     }
 
     private Bucket newBucket(String key) {
-        Bandwidth limit = Bandwidth.classic(5, Refill.greedy(5, Duration.ofMinutes(15)));
+        Bandwidth limit = Bandwidth.classic(2, Refill.greedy(2, Duration.ofSeconds(1)));
         return Bucket.builder().addLimit(limit).build();
     }
 }
