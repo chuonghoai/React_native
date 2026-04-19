@@ -358,32 +358,50 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: _controller.lowStockProducts.length,
               itemBuilder: (context, index) {
                 final product = _controller.lowStockProducts[index];
-                return Container(
-                  width: 140,
-                  margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        product.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'Tồn kho: ${product.quantity}',
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
+                return GestureDetector(
+                  onTap: () {
+                    if (product.id != null) {
+                      Navigator.pushNamed(
+                        context,
+                        '/product-detail',
+                        arguments: product.id,
+                      );
+                    }
+                  },
+                  child: Container(
+                    width: 140,
+                    margin: const EdgeInsets.only(right: 12),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Tồn kho: ${product.quantity}',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -406,7 +424,17 @@ class _HomeScreenState extends State<HomeScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            clipBehavior: Clip.antiAlias,
             child: ListTile(
+              onTap: () {
+                if (product.id != null) {
+                  Navigator.pushNamed(
+                    context,
+                    '/product-detail',
+                    arguments: product.id,
+                  );
+                }
+              },
               contentPadding: const EdgeInsets.all(12),
               leading: Container(
                 width: 60,

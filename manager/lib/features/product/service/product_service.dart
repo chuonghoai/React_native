@@ -2,9 +2,7 @@ import 'package:manager/features/product/repository/product_repository.dart';
 import 'package:manager/shared/models/product_model.dart';
 
 class AdminProductService {
-  final ProductRepository _repository;
-
-  AdminProductService(this._repository);
+  final ProductRepository _repository = ProductRepository();
 
   Map<String, dynamic> _prepareRequestData(ProductModel product) {
     final Map<String, dynamic> data = product.toJson();

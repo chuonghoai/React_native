@@ -2,9 +2,7 @@ import 'package:manager/core/network/api_client.dart';
 import 'package:manager/core/network/api_response.dart';
 
 class ProductRepository {
-  final ApiClient _apiClient;
-
-  ProductRepository(this._apiClient);
+  final ApiClient _apiClient = ApiClient();
 
   Future<ApiResponse> createProduct(Map<String, dynamic> data) async {
     final response = await _apiClient.client.post(

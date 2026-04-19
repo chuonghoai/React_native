@@ -1,6 +1,9 @@
 // ignore_for_file: unused_import, use_super_parameters, avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:manager/features/product/ui/product_edit_screen.dart';
+import 'package:manager/features/product/ui/product_screen.dart';
+import 'package:manager/shared/models/product_model.dart';
 import 'package:manager/shared/websocket/websocket_gateway.dart';
 import 'core/network/api_client.dart';
 import 'core/network/api_response.dart';
@@ -92,13 +95,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/home': (context) => const HomeScreen(),
       },
       onGenerateRoute: (settings) {
-        // User profile
-        if (settings.name == '/user-profile') {
-          final String userId = settings.arguments as String;
-
-          // return MaterialPageRoute(
-          //   builder: (context) => UserProfileScreen(userId: userId),
-          // );
+        if (settings.name == '/product-detail') {
+          final productId = settings.arguments as int;
+          return MaterialPageRoute(
+            builder: (_) => ProductScreen(productId: productId),
+          );
+        }
+        if (settings.name == '/product-edit') {
+          final product = settings.arguments as ProductModel;
+          return MaterialPageRoute(
+            builder: (_) => ProductEditScreen(product: product),
+          );
         }
         return null;
       },
