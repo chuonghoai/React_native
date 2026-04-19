@@ -7,18 +7,14 @@ class AuthService {
   final AuthRepository _repository = AuthRepository();
 
   // Login
-  Future<String?> processLogin(
-    String email,
-    String password,
-    bool rememberMe,
-  ) async {
+  Future<String?> processLogin(String username, String password) async {
     try {
-      final apiResponse = await _repository.login(email, password, rememberMe);
+      final apiResponse = await _repository.login(username, password);
 
       if (apiResponse.success && apiResponse.data != null) {
         final loginData = LoginResponseModel.fromJson(apiResponse.data);
-
-        await LocalStorage.setToken(loginData.tempToken);
+        await LocalStorage.setToken(loginData.token);
+        await LocalStorage.setUser(loginData.user.toJson());
 
         return null;
       } else {
@@ -28,34 +24,6 @@ class AuthService {
       return e.error?.toString() ?? "Lỗi kết nối máy chủ.";
     } catch (e) {
       return "Đã xảy ra lỗi hệ thống: $e";
-    }
-  }
-
-  // Verify login OTP
-  Future<String?> processVerifyLoginOtp(String otp) async {
-    try {
-      final tempToken = await LocalStorage.getToken();
-      if (tempToken == null || tempToken.isEmpty) {
-        return "Phiên đăng nhập bị lỗi hoặc đã hết hạn. Vui lòng đăng nhập lại.";
-      }
-      final apiResponse = await _repository.verifyLoginOtp(tempToken, otp);
-
-      if (apiResponse.success && apiResponse.data != null) {
-        final data = apiResponse.data;
-        await LocalStorage.setToken(data['accessToken']);
-        await LocalStorage.setRefreshToken(data['refreshToken']);
-        await LocalStorage.setUser(data['user']);
-
-        // await WebsocketGateway().connect();
-
-        return null;
-      } else {
-        return apiResponse.message ?? "Mã OTP không hợp lệ";
-      }
-    } on DioException catch (e) {
-      return e.error?.toString() ?? "Lỗi kết nối máy chủ";
-    } catch (e) {
-      return "Đã xảy ra lỗi: $e";
     }
   }
 }

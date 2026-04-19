@@ -12,11 +12,24 @@ class ApiResponse<T> {
   });
 
   factory ApiResponse.fromJson(Map<String, dynamic> json) {
+    ApiError? parsedError;
+    if (json['error'] != null) {
+      if (json['error'] is String) {
+        // Trường hợp Spring tự trả về: "error": "Unauthorized", "status": 401
+        parsedError = ApiError(
+          code: json['status']?.toString() ?? 'SPRING_ERROR',
+          message: json['error'],
+        );
+      } else if (json['error'] is Map) {
+        parsedError = ApiError.fromJson(json['error']);
+      }
+    }
+
     return ApiResponse(
       success: json['success'] ?? false,
-      message: json['message'],
+      message: json['message'] ?? parsedError?.message,
       data: json['data'],
-      error: json['error'] != null ? ApiError.fromJson(json['error']) : null,
+      error: parsedError,
     );
   }
 }

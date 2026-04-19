@@ -15,6 +15,8 @@ class LoginController extends ChangeNotifier {
 
   // Login
   Future<bool> login(String email, String password) async {
+    print(email);
+    print(password);
     if (email.isEmpty || password.isEmpty) {
       errorMessage = "Vui lòng nhập đầy đủ email và mật khẩu.";
       notifyListeners();
@@ -25,23 +27,11 @@ class LoginController extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    final error = await _authService.processLogin(email, password, rememberMe);
-
+    final error = await _authService.processLogin(email, password);
+    print("Error: $error");
     isLoading = false;
     if (error == null) {
       notifyListeners();
-      return true;
-    } else {
-      errorMessage = error;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  // Verify login OTP
-  Future<bool> verifyOtp(String otp) async {
-    final error = await _authService.processVerifyLoginOtp(otp);
-    if (error == null) {
       return true;
     } else {
       errorMessage = error;

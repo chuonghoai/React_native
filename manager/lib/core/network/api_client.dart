@@ -16,7 +16,7 @@ class ApiClient {
 
   ApiClient._internal() {
     BaseOptions options = BaseOptions(
-      baseUrl: 'http://192.168.1.32:3000',
+      baseUrl: 'http://10.0.2.2:8087',
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {
@@ -52,7 +52,8 @@ class ApiClient {
           String errorMessage = 'Lỗi kết nối máy chủ';
           String errorCode = 'UNKNOWN_ERROR';
 
-          if (e.response?.data != null && e.response?.data is Map<String, dynamic>) {
+          if (e.response?.data != null &&
+              e.response?.data is Map<String, dynamic>) {
             final errorResponse = ApiResponse.fromJson(e.response!.data);
             if (errorResponse.error != null) {
               errorMessage = errorResponse.error!.message;
@@ -62,25 +63,33 @@ class ApiClient {
             }
           }
 
-          if (e.response?.statusCode == 401 && errorCode != 'INVALID_CREDENTIALS') {
-            print("Token hết hạn hoặc không hợp lệ. Xóa token và đá ra Login...");
-            
+          if (e.response?.statusCode == 401 &&
+              errorCode != 'INVALID_CREDENTIALS') {
+            print(
+              "Token hết hạn hoặc không hợp lệ. Xóa token và đá ra Login...",
+            );
+
             await LocalStorage.clearAll();
-            
+
             final context = navigatorKey.currentContext;
             if (context != null) {
               showDialog(
                 context: context,
-                barrierDismissible: false, 
+                barrierDismissible: false,
                 builder: (BuildContext ctx) {
                   return AlertDialog(
                     title: const Text("Hết phiên đăng nhập"),
-                    content: const Text("Phiên đăng nhập của bạn đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại."),
+                    content: const Text(
+                      "Phiên đăng nhập của bạn đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.",
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () {
-                          Navigator.of(ctx).pop(); 
-                          navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+                          Navigator.of(ctx).pop();
+                          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                            '/login',
+                            (route) => false,
+                          );
                         },
                         child: const Text("Đồng ý"),
                       ),

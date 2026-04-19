@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:manager/features/auth/ui/forgotPassword/verify_email_screen.dart';
-import 'package:manager/shared/ui/otp_verify/otp_verify_screen.dart';
 import 'login_controller.dart';
 import '../../../../main.dart';
 
@@ -45,25 +44,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (success) {
       if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => OtpVerifyScreen(
-            title: "Xác thực đăng nhập",
-            onVerify: (otp) async {
-              bool isVerified = await _controller.verifyOtp(otp);
-
-              if (isVerified) {
-                navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                  '/home',
-                  (route) => false,
-                );
-              } else {
-                throw Exception(_controller.errorMessage);
-              }
-            },
-          ),
-        ),
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        '/home',
+        (route) => false,
       );
     }
   }
@@ -80,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               // LOGO
               Text(
-                "GoGo Admin",
+                "ECommerce Admin",
                 style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.w900,
@@ -225,32 +208,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Remember me?
-                            Row(
-                              children: [
-                                SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: Checkbox(
-                                    value: _controller.rememberMe,
-                                    activeColor: amberGold,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    onChanged: _controller.toggleRememberMe,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  "Ghi nhớ đăng nhập",
-                                  style: TextStyle(
-                                    color: textMain,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-
                             // Forgot password?
                             TextButton(
                               onPressed: () {

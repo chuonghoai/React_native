@@ -20,12 +20,13 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/admin/auth")
 @CrossOrigin
 public class AdminAuthController {
-    
+
     @Autowired
     private AuthAdminService authAdminService;
 
     @PostMapping("/login")
     public ApiResponse login(@Valid @RequestBody LoginRequest request) {
+        System.out.println("Login request: " + request.getUsername() + " " + request.getPassword());
         return authAdminService.login(request.getUsername(), request.getPassword());
     }
 
