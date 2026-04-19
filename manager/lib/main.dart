@@ -1,6 +1,7 @@
 // ignore_for_file: unused_import, use_super_parameters, avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:manager/shared/websocket/websocket_gateway.dart';
 import 'core/network/api_client.dart';
 import 'core/network/api_response.dart';
 import 'core/storage/local_storage.dart';
@@ -28,7 +29,7 @@ void main() async {
           await LocalStorage.setUser(apiResponse.data);
         }
 
-        // await WebsocketGateway().connect();
+        await WebsocketGateway().connect();
       }
     } catch (e) {
       await LocalStorage.clearAll();
@@ -65,10 +66,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.detached:
         print('[App Lifecycle] App Detached -> Đang ngắt Websocket...');
-        // WebsocketGateway().disconnect();
+        WebsocketGateway().disconnect();
         break;
       case AppLifecycleState.resumed:
-        // WebsocketGateway().connect();
+        WebsocketGateway().connect();
         break;
       default:
         break;
@@ -78,7 +79,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'GoGo Admin',
+      title: 'ECommerce Admin',
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

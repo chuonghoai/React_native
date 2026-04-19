@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:manager/shared/websocket/websocket_gateway.dart';
 import '../../../core/storage/local_storage.dart';
 import 'dto/response/login_response_model.dart';
 import '../repository/auth_repository.dart';
@@ -15,6 +16,7 @@ class AuthService {
         final loginData = LoginResponseModel.fromJson(apiResponse.data);
         await LocalStorage.setToken(loginData.token);
         await LocalStorage.setUser(loginData.user.toJson());
+        await WebsocketGateway().connect();
 
         return null;
       } else {
