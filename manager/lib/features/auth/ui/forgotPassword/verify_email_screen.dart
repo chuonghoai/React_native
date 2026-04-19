@@ -1,7 +1,7 @@
 // ignore_for_file: use_super_parameters, use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
-import '../../../../shared/ui/otp_verify/otp_verify_screen.dart';
+import 'otp_verify_screen.dart';
 import 'forgot_password_controller.dart';
 import 'reset_password_screen.dart';
 

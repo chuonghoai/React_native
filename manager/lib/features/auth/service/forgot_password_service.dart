@@ -19,12 +19,12 @@ class ForgotPasswordService {
     }
   }
 
-  // Trả về resetToken (String) nếu thành công, Ném lỗi (Exception) nếu thất bại
-  Future<String> processVerifyResetOtp(String email, String otp) async {
+  // Trả về true nếu thành công, Ném lỗi (Exception) nếu thất bại
+  Future<bool> processVerifyResetOtp(String email, String otp) async {
     try {
       final apiResponse = await _repository.verifyResetOtp(email, otp);
-      if (apiResponse.success && apiResponse.data != null) {
-        return apiResponse.data['resetToken']; // Trích xuất data
+      if (apiResponse.success) {
+        return true;
       }
       throw Exception(apiResponse.message ?? "Mã OTP không hợp lệ");
     } on DioException catch (e) {
@@ -36,12 +36,14 @@ class ForgotPasswordService {
 
   // Trả về null nếu thành công, trả về String nếu lỗi
   Future<String?> processResetPassword(
-    String resetToken,
+    String email,
+    String otp,
     String newPassword,
   ) async {
     try {
       final apiResponse = await _repository.resetPassword(
-        resetToken,
+        email,
+        otp,
         newPassword,
       );
       if (apiResponse.success) return null;

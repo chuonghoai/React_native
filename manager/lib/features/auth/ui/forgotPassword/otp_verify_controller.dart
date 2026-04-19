@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'otp_verify_service.dart';
 
 class OtpVerifyController extends ChangeNotifier {
-  final OtpVerifyService _service = OtpVerifyService();
   final Future<void> Function(String) onVerifyCallback;
 
   bool isLoading = false;
@@ -11,7 +9,7 @@ class OtpVerifyController extends ChangeNotifier {
   OtpVerifyController({required this.onVerifyCallback});
 
   Future<void> submitOtp(String otpCode) async {
-    final error = _service.validateOtpFormat(otpCode);
+    final error = _validateOtpFormat(otpCode);
     if (error != null) {
       errorMessage = error;
       notifyListeners();
@@ -30,5 +28,15 @@ class OtpVerifyController extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  String? _validateOtpFormat(String otp) {
+    if (otp.isEmpty) return "Vui lòng nhập mã OTP";
+    if (otp.length < 6) return "Mã OTP phải bao gồm 6 chữ số";
+    
+    if (!RegExp(r'^[0-9]+$').hasMatch(otp)) {
+      return "Mã OTP chỉ được chứa các chữ số";
+    }
+    return null;
   }
 }

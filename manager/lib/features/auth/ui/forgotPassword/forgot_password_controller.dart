@@ -9,7 +9,7 @@ class ForgotPasswordController extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   String email = '';
-  String resetToken = '';
+  String resetOtp = '';
 
   // Verify email button: send OTP
   Future<bool> sendOtp(String inputEmail) async {
@@ -40,11 +40,12 @@ class ForgotPasswordController extends ChangeNotifier {
   // Verify OTP butotn
   Future<bool> verifyOtp(String otp) async {
     try {
-      // Service sẽ quăng Exception nếu lỗi, trả về token nếu thành công
-      final token = await _service.processVerifyResetOtp(email, otp);
-      
-      resetToken = token; // Lưu lại resetToken để dùng cho bước đổi mật khẩu
-      return true;
+      final isSuccess = await _service.processVerifyResetOtp(email, otp);
+      if (isSuccess) {
+        resetOtp = otp; 
+        return true;
+      }
+      return false;
     } catch (e) {
       errorMessage = e.toString().replaceAll("Exception: ", "");
       notifyListeners();
@@ -69,7 +70,7 @@ class ForgotPasswordController extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    final error = await _service.processResetPassword(resetToken, newPassword);
+    final error = await _service.processResetPassword(email, resetOtp, newPassword);
 
     isLoading = false;
     if (error == null) {
