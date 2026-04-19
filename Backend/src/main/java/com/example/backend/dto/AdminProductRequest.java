@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 public class AdminProductRequest {
     private String name;
     private Double price;
-    private Double originalPrice;
     private String description;
     private String imageUrl;
     private Long quantity;
