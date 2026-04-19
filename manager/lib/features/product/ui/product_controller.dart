@@ -55,8 +55,31 @@ class ProductController extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      final result = await _productService.updateProduct(updatedModel);
+      String? newImageUrl;
+      if (selectedImage != null && updatedModel.id != null) {
+        final uploadResponse = await _productService.uploadImage(
+          updatedModel.id!,
+          selectedImage!,
+        );
+        newImageUrl = uploadResponse;
+      }
+
+      final modelToSave = newImageUrl != null
+          ? ProductModel(
+              id: updatedModel.id,
+              name: updatedModel.name,
+              price: updatedModel.price,
+              quantity: updatedModel.quantity,
+              description: updatedModel.description,
+              category: updatedModel.category,
+              imageUrl: newImageUrl,
+              soldCount: updatedModel.soldCount,
+            )
+          : updatedModel;
+
+      final result = await _productService.updateProduct(modelToSave);
       currentProduct = result;
+      selectedImage = null;
       return true;
     } catch (e) {
       errorMessage = e.toString();

@@ -1,5 +1,6 @@
 package com.example.backend.controller.Admin;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.dto.AdminProductRequest;
 import com.example.backend.dto.AdminProductResponse;
@@ -28,6 +32,7 @@ import com.example.backend.entities.Product;
 import com.example.backend.entities.Voucher;
 import com.example.backend.repositories.ProductRepository;
 import com.example.backend.service.Admin.AdminProductService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/admin/products")
@@ -77,13 +82,26 @@ public class AdminProductController {
     }
 
     @PatchMapping("/{id}")
-    public ApiResponse updateProduct(@PathVariable Long id, @RequestBody AdminProductRequest request) {
-        return adminProductService.updateProduct(id, request);
+    public ApiResponse updateProduct(
+            @PathVariable Long id,
+            @RequestBody AdminProductRequest request) {
+        try {
+            return adminProductService.updateProduct(id, request);
+        } catch (Exception e) {
+            return ApiResponse.error("Lỗi: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse deleteProduct(@PathVariable Long id) {
         return adminProductService.deleteProduct(id);
+    }
+
+    @PostMapping(value = "/{id}/image", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ApiResponse uploadProductImage(
+            @PathVariable Long id,
+            @RequestPart("image") MultipartFile image) throws IOException {
+        return adminProductService.uploadImage(id, image);
     }
 
     private List<AdminProductResponse> mapToAdminDto(List<Product> products) {

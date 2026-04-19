@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:manager/core/utils/image_url_helper.dart';
 import 'package:manager/features/home/ui/home_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -442,9 +443,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
-                  image: product.imageUrl != null
+                  image: ImageUrlHelper.buildUrl(product.imageUrl) != null
                       ? DecorationImage(
-                          image: NetworkImage(product.imageUrl!),
+                          image: NetworkImage(
+                            ImageUrlHelper.buildUrl(product.imageUrl)!,
+                          ),
                           fit: BoxFit.cover,
                         )
                       : null,

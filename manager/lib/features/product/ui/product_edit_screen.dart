@@ -1,6 +1,7 @@
 // ignore_for_file: use_super_parameters, deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:manager/core/utils/image_url_helper.dart';
 import 'package:manager/features/product/ui/product_controller.dart';
 import 'package:manager/shared/models/product_model.dart';
 
@@ -63,8 +64,10 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                           )
                         : (widget.product.imageUrl != null
                               ? Image.network(
-                                  widget.product.imageUrl!,
+                                  ImageUrlHelper.buildUrl(widget.product.imageUrl)!,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      const Icon(Icons.broken_image, size: 50),
                                 )
                               : const Icon(Icons.add_a_photo, size: 50)),
                   ),
@@ -181,7 +184,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Đã cập nhật sản phẩm')));
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     }
   }
 }

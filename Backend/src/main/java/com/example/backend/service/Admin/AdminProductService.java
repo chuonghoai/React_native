@@ -1,7 +1,15 @@
 package com.example.backend.service.Admin;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.dto.AdminProductRequest;
 import com.example.backend.dto.AdminProductResponse;
@@ -58,7 +66,8 @@ public class AdminProductService {
         return ApiResponse.success("Lấy thông tin sản phẩm thành công", mapToResponse(product));
     }
 
-    public ApiResponse updateProduct(Long id, AdminProductRequest request) {
+    public ApiResponse updateProduct(Long id, AdminProductRequest request)
+            throws IOException {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
@@ -81,6 +90,26 @@ public class AdminProductService {
 
         Product updatedProduct = productRepository.save(product);
         return ApiResponse.success("Cập nhật sản phẩm thành công", mapToResponse(updatedProduct));
+    }
+
+    public ApiResponse uploadImage(Long id, MultipartFile image) throws IOException {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+        String uploadDir = "uploads/";
+        File dir = new File(uploadDir);
+        if (!dir.exists())
+            dir.mkdirs();
+
+        String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir + fileName);
+        Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        String imageUrl = "/uploads/" + fileName;
+        product.setImageUrl(imageUrl);
+        productRepository.save(product);
+
+        return ApiResponse.success("Upload ảnh thành công", imageUrl);
     }
 
     public ApiResponse deleteProduct(Long id) {

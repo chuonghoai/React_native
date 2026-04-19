@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:manager/core/utils/image_url_helper.dart';
 import 'package:manager/features/product/ui/product_controller.dart';
 
 class ProductScreen extends StatefulWidget {
@@ -35,97 +36,121 @@ class _ProductScreenState extends State<ProductScreen> {
               if (p != null)
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: () => Navigator.pushNamed(
-                    context,
-                    '/product-edit',
-                    arguments: p,
-                  ),
+                  onPressed: () async {
+                    final result = await Navigator.pushNamed(
+                      context,
+                      '/product-edit',
+                      arguments: p,
+                    );
+
+                    if (result == true) {
+                      _controller.fetchProductDetail(widget.productId);
+                    }
+                  },
                 ),
             ],
           ),
-          body: _controller.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : p == null
-              ? const Center(child: Text('Không tìm thấy sản phẩm'))
-              : SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 300,
-                        width: double.infinity,
-                        color: Colors.grey[200],
-                        child: p.imageUrl != null
-                            ? Image.network(p.imageUrl!, fit: BoxFit.cover)
-                            : const Icon(
-                                Icons.image,
-                                size: 100,
-                                color: Colors.grey,
-                              ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              p.name,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              NumberFormat.currency(
-                                locale: 'vi_VN',
-                                symbol: 'đ',
-                              ).format(p.price),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Divider(height: 32),
-                            _buildInfoRow(
-                              Icons.shopping_bag_outlined,
-                              'Đã bán:',
-                              '${p.soldCount ?? 0}',
-                            ),
-                            _buildInfoRow(
-                              Icons.inventory_2_outlined,
-                              'Tồn kho:',
-                              '${p.quantity}',
-                              isHighlight: true,
-                            ),
-                            _buildInfoRow(
-                              Icons.category_outlined,
-                              'Danh mục:',
-                              p.category?.name ?? 'Chưa phân loại',
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Mô tả sản phẩm',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              p.description ?? 'Không có mô tả',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
+          body: RefreshIndicator(
+            onRefresh: () => _controller.fetchProductDetail(widget.productId),
+            child: _controller.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : p == null
+                ? const SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: 400,
+                      child: Center(child: Text('Không tìm thấy sản phẩm')),
+                    ),
+                  )
+                : SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 300,
+                          width: double.infinity,
+                          color: Colors.grey[200],
+                          child: ImageUrlHelper.buildUrl(p.imageUrl) != null
+                              ? Image.network(
+                                  ImageUrlHelper.buildUrl(p.imageUrl)!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.broken_image,
+                                    size: 100,
+                                    color: Colors.grey,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.image,
+                                  size: 100,
+                                  color: Colors.grey,
+                                ),
                         ),
-                      ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                p.name,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                NumberFormat.currency(
+                                  locale: 'vi_VN',
+                                  symbol: 'đ',
+                                ).format(p.price),
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Divider(height: 32),
+                              _buildInfoRow(
+                                Icons.shopping_bag_outlined,
+                                'Đã bán:',
+                                '${p.soldCount ?? 0}',
+                              ),
+                              _buildInfoRow(
+                                Icons.inventory_2_outlined,
+                                'Tồn kho:',
+                                '${p.quantity}',
+                                isHighlight: true,
+                              ),
+                              _buildInfoRow(
+                                Icons.category_outlined,
+                                'Danh mục:',
+                                p.category?.name ?? 'Chưa phân loại',
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Mô tả sản phẩm',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                p.description ?? 'Không có mô tả',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+          ),
         );
       },
     );

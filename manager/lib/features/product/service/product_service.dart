@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:manager/features/product/repository/product_repository.dart';
 import 'package:manager/shared/models/product_model.dart';
 
@@ -54,6 +56,18 @@ class AdminProductService {
         return ProductModel.fromJson(response.data);
       }
       throw Exception(response.message ?? 'Lỗi khi cập nhật sản phẩm');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> uploadImage(int id, File imageFile) async {
+    try {
+      final response = await _repository.uploadImage(id, imageFile);
+      if (response.success && response.data != null) {
+        return response.data as String;
+      }
+      throw Exception(response.message ?? 'Lỗi khi upload ảnh');
     } catch (e) {
       rethrow;
     }
