@@ -2,9 +2,7 @@ import 'package:manager/core/network/api_client.dart';
 import 'package:manager/core/network/api_response.dart';
 
 class DashboardRepository {
-  final ApiClient _apiClient;
-
-  DashboardRepository(this._apiClient);
+  final ApiClient _apiClient = ApiClient();
 
   Future<ApiResponse> getOrderStatistics() async {
     final response = await _apiClient.client.get(

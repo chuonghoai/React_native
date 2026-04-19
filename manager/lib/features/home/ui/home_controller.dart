@@ -5,18 +5,14 @@ import 'package:manager/features/home/service/product_service.dart';
 import 'package:manager/shared/models/product_model.dart';
 
 class HomeController extends ChangeNotifier {
-  final DashboardService _dashboardService;
-  final ProductService _productService;
-  final CategoryService _categoryService;
-
-  HomeController(
-    this._dashboardService,
-    this._productService,
-    this._categoryService,
-  );
+  final DashboardService _dashboardService = DashboardService();
+  final ProductService _productService = ProductService();
+  final CategoryService _categoryService = CategoryService();
 
   // States
   bool isLoading = true;
+  bool isFetchingMore = false;
+  bool hasMoreProducts = true;
   String? errorMessage;
 
   // Data
@@ -24,14 +20,19 @@ class HomeController extends ChangeNotifier {
   double currentMonthRevenue = 0.0;
   int totalUsers = 0;
 
+  List<CategoryModel> categories = [];
   List<ProductModel> recentProducts = [];
   List<ProductModel> lowStockProducts = [];
-  List<CategoryModel> categories = [];
+
+  int _currentPage = 0;
+  final int _pageSize = 20;
 
   Future<void> loadDashboardData() async {
     try {
       isLoading = true;
       errorMessage = null;
+      _currentPage = 0;
+      hasMoreProducts = true;
       notifyListeners();
 
       final now = DateTime.now();
@@ -40,21 +41,51 @@ class HomeController extends ChangeNotifier {
         _dashboardService.getOrderStats(),
         _dashboardService.getRevenue(now.month, now.year),
         _dashboardService.getTotalUsers(),
-        _productService.getProducts(page: 0, size: 5),
-        _productService.getLowStockWarning(threshold: 10),
         _categoryService.getAllCategories(),
+        _productService.getProducts(page: _currentPage, size: _pageSize),
+        _productService.getLowStockWarning(threshold: 10),
       ]);
 
       orderStats = results[0] as Map<String, int>;
       currentMonthRevenue = results[1] as double;
       totalUsers = results[2] as int;
-      recentProducts = results[3] as List<ProductModel>;
-      lowStockProducts = results[4] as List<ProductModel>;
-      categories = results[5] as List<CategoryModel>;
+      categories = results[3] as List<CategoryModel>;
+
+      final products = results[4] as List<ProductModel>;
+      recentProducts = products;
+      if (products.length < _pageSize) hasMoreProducts = false;
+
+      lowStockProducts = results[5] as List<ProductModel>;
     } catch (e) {
       errorMessage = e.toString();
     } finally {
       isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMoreProducts() async {
+    if (isFetchingMore || !hasMoreProducts || isLoading) return;
+
+    try {
+      isFetchingMore = true;
+      notifyListeners();
+
+      _currentPage++;
+      final newProducts = await _productService.getProducts(
+        page: _currentPage,
+        size: _pageSize,
+      );
+
+      if (newProducts.isEmpty || newProducts.length < _pageSize) {
+        hasMoreProducts = false;
+      }
+
+      recentProducts.addAll(newProducts);
+    } catch (e) {
+      _currentPage--;
+    } finally {
+      isFetchingMore = false;
       notifyListeners();
     }
   }

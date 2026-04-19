@@ -1,9 +1,7 @@
 import 'package:manager/features/home/repository/dashboard_repository.dart';
 
 class DashboardService {
-  final DashboardRepository _repository;
-
-  DashboardService(this._repository);
+  final DashboardRepository _repository = DashboardRepository();
 
   Future<Map<String, int>> getOrderStats() async {
     try {

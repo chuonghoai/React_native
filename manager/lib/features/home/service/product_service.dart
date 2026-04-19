@@ -2,9 +2,7 @@ import 'package:manager/features/home/repository/product_repository.dart';
 import 'package:manager/shared/models/product_model.dart';
 
 class ProductService {
-  final ProductRepository _repository;
-
-  ProductService(this._repository);
+  final ProductRepository _repository = ProductRepository();
 
   Future<List<ProductModel>> getProducts({int page = 0, int size = 20}) async {
     try {

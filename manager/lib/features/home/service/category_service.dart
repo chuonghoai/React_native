@@ -2,9 +2,7 @@ import 'package:manager/features/home/repository/category_repository.dart';
 import 'package:manager/shared/models/product_model.dart';
 
 class CategoryService {
-  final CategoryRepository _repository;
-
-  CategoryService(this._repository);
+  final CategoryRepository _repository = CategoryRepository();
 
   Future<List<CategoryModel>> getAllCategories() async {
     try {
