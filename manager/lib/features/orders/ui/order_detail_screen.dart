@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:manager/features/home/ui/home_controller.dart';
 import 'package:manager/features/orders/models/order_detail_model.dart';
 import 'package:manager/features/orders/ui/orders_controller.dart';
 
@@ -16,6 +17,7 @@ class OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   final OrdersController _controller = OrdersController();
+  final HomeController _homeController = homeControllerInstance;
 
   @override
   void initState() {
@@ -290,6 +292,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 nextInfo['status']!,
               );
               if (success && mounted) {
+                _homeController.incrementNewOrdersCount(isIncrease: false);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
