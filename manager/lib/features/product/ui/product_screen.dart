@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:manager/core/utils/image_url_helper.dart';
 import 'package:manager/features/product/ui/product_controller.dart';
+import 'package:manager/shared/models/product_model.dart';
 
 class ProductScreen extends StatefulWidget {
   final int productId;
@@ -75,7 +76,7 @@ class _ProductScreenState extends State<ProductScreen> {
                               ? Image.network(
                                   ImageUrlHelper.buildUrl(p.imageUrl)!,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => const Icon(
+                                  errorBuilder: (context, error, stackTrace) => const Icon(
                                     Icons.broken_image,
                                     size: 100,
                                     color: Colors.grey,
@@ -144,6 +145,40 @@ class _ProductScreenState extends State<ProductScreen> {
                                   color: Colors.black87,
                                 ),
                               ),
+
+                              const SizedBox(height: 32),
+                              const Divider(
+                                thickness: 4,
+                                color: Color(0xFFF5F5F5),
+                              ),
+                              const SizedBox(height: 16),
+
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Đánh giá từ khách hàng',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '(${p.reviews?.length ?? 0})',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              _buildReviewList(p.reviews),
+
+                              const SizedBox(height: 40),
                             ],
                           ),
                         ),
@@ -180,6 +215,117 @@ class _ProductScreenState extends State<ProductScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildReviewList(List<ReviewModel>? reviews) {
+    if (reviews == null || reviews.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey.shade200,
+            style: BorderStyle.none,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.rate_review_outlined,
+              size: 40,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Chưa có đánh giá nào.',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap:
+          true,
+      physics:
+          const NeverScrollableScrollPhysics(),
+      itemCount: reviews.length,
+      separatorBuilder: (context, index) => const Divider(height: 24),
+      itemBuilder: (context, index) {
+        final review = reviews[index];
+        return _buildReviewItem(review);
+      },
+    );
+  }
+
+  Widget _buildReviewItem(ReviewModel review) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.blue.shade100,
+              backgroundImage: review.avatarUrl.isNotEmpty
+                  ? NetworkImage(review.avatarUrl)
+                  : null,
+              child: review.avatarUrl.isEmpty
+                  ? Text(
+                      (review.fullname.isNotEmpty)
+                          ? review.fullname[0].toUpperCase()
+                          : 'U',
+                      style: TextStyle(
+                        color: Colors.blue.shade800,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    review.fullname,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: List.generate(5, (index) {
+                      return Icon(
+                        index < review.rating ? Icons.star : Icons.star_border,
+                        size: 14,
+                        color: Colors.amber,
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (review.comment.isNotEmpty)
+          Text(
+            review.comment,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+              height: 1.4,
+            ),
+          ),
+      ],
     );
   }
 }
