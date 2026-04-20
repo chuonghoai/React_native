@@ -7,6 +7,7 @@ class VoucherController extends ChangeNotifier {
   final AdminVoucherService _service = AdminVoucherService();
 
   List<VoucherModel> vouchers = [];
+  VoucherModel? voucher;
   bool isLoading = false;
   String? errorMessage;
 
@@ -25,11 +26,42 @@ class VoucherController extends ChangeNotifier {
     }
   }
 
+  Future<void> getVoucherDetail(int id) async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      voucher = await _service.getVoucherById(id);
+    } catch (e) {
+      errorMessage = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> addVoucher(VoucherRequest request) async {
     try {
       isLoading = true;
       notifyListeners();
       final success = await _service.createVoucher(request);
+      if (success) await fetchVouchers();
+      return success;
+    } catch (e) {
+      errorMessage = e.toString();
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateVoucher(int id, VoucherRequest request) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+      final success = await _service.updateVoucher(id, request);
       if (success) await fetchVouchers();
       return success;
     } catch (e) {

@@ -1,5 +1,7 @@
 package com.example.backend.service.Admin;
 
+import com.example.backend.dto.AdminProductResponse;
+import com.example.backend.dto.AdminVoucherResponse;
 import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.VoucherRequest;
 import com.example.backend.entities.Product;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,16 +20,34 @@ public class AdminVoucherService {
 
     private final VoucherRepository voucherRepository;
     private final ProductRepository productRepository;
+    private final AdminProductService adminProductService;
+
+    private AdminVoucherResponse mapToResponse(Voucher voucher) {
+        List<AdminProductResponse> productResponses = voucher.getProducts().stream()
+                .map(adminProductService::mapToResponse)
+                .collect(Collectors.toList());
+
+        return AdminVoucherResponse.builder()
+                .id(voucher.getId())
+                .name(voucher.getName())
+                .discountAmount(voucher.getDiscountAmount())
+                .startDate(voucher.getStartDate())
+                .endDate(voucher.getEndDate())
+                .products(productResponses)
+                .build();
+    }
 
     public ApiResponse getAllVouchers() {
-        List<Voucher> vouchers = voucherRepository.findAll();
+        List<AdminVoucherResponse> vouchers = voucherRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
         return ApiResponse.success("Lấy danh sách voucher thành công", vouchers);
     }
 
     public ApiResponse getVoucherById(Long id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Voucher"));
-        return ApiResponse.success("Lấy voucher thành công", voucher);
+        return ApiResponse.success("Lấy voucher thành công", mapToResponse(voucher));
     }
 
     public ApiResponse createVoucher(VoucherRequest request) {
@@ -42,7 +63,8 @@ public class AdminVoucherService {
             voucher.setProducts(products);
         }
 
-        return ApiResponse.success("Thêm voucher thành công", voucherRepository.save(voucher));
+        Voucher savedVoucher = voucherRepository.save(voucher);
+        return ApiResponse.success("Thêm voucher thành công", mapToResponse(savedVoucher));
     }
 
     public ApiResponse updateVoucher(Long id, VoucherRequest request) {
@@ -61,7 +83,8 @@ public class AdminVoucherService {
             voucher.getProducts().clear();
         }
 
-        return ApiResponse.success("Cập nhật voucher thành công", voucherRepository.save(voucher));
+        Voucher updatedVoucher = voucherRepository.save(voucher);
+        return ApiResponse.success("Cập nhật voucher thành công", mapToResponse(updatedVoucher));
     }
 
     public ApiResponse deleteVoucher(Long id) {

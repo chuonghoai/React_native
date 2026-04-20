@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:manager/features/voucher/ui/enum/voucher_purpose.dart';
+import 'package:manager/features/voucher/ui/voucher_detail_screen.dart';
 import 'voucher_controller.dart';
 import '../models/voucher_model.dart';
 
@@ -62,7 +64,13 @@ class _VoucherScreenState extends State<VoucherScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO:
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  VoucherDetailScreen(purpose: VoucherPurpose.add),
+            ),
+          );
         },
         backgroundColor: Colors.orangeAccent,
         child: const Icon(Icons.add, color: Colors.white),
@@ -77,109 +85,140 @@ class _VoucherScreenState extends State<VoucherScreen> {
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isExpired ? Colors.grey[400] : Colors.orange[50],
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(15),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VoucherDetailScreen(
+                voucherId: voucher.id,
+                purpose: VoucherPurpose.view,
               ),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.confirmation_number,
-                  color: isExpired ? Colors.grey[700] : Colors.orange,
-                  size: 30,
+          );
+        },
+        borderRadius: BorderRadius.circular(15),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isExpired ? Colors.grey[400] : Colors.orange[50],
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(15),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    voucher.name,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isExpired ? Colors.grey[800] : Colors.orange[900],
-                    ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.confirmation_number,
+                    color: isExpired ? Colors.grey[700] : Colors.orange,
+                    size: 30,
                   ),
-                ),
-                if (isExpired)
-                  const Text(
-                    'HẾT HẠN',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Mức giảm:',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    Text(
-                      currencyFormat.format(voucher.discountAmount),
-                      style: const TextStyle(
-                        fontSize: 20,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      voucher.name,
+                      style: TextStyle(
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.redAccent,
+                        color: isExpired
+                            ? Colors.grey[800]
+                            : Colors.orange[900],
                       ),
                     ),
-                  ],
-                ),
-                const Divider(height: 24),
-                Row(
-                  children: [
-                    const Icon(Icons.date_range, size: 16, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Áp dụng: ${dateFormat.format(voucher.startDate)} - ${dateFormat.format(voucher.endDate)}',
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton.icon(
-                      onPressed: () => _controller.removeVoucher(voucher.id!),
-                      icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      label: const Text(
-                        'Xóa',
-                        style: TextStyle(color: Colors.red),
+                  ),
+                  if (isExpired)
+                    const Text(
+                      'HẾT HẠN',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        // TODO:
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                      ),
-                      child: const Text(
-                        'Chỉnh sửa',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Mức giảm:',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      Text(
+                        currencyFormat.format(voucher.discountAmount),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 24),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.date_range,
+                        size: 16,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Áp dụng: ${dateFormat.format(voucher.startDate)} - ${dateFormat.format(voucher.endDate)}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => _controller.removeVoucher(voucher.id!),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
+                        label: const Text(
+                          'Xóa',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VoucherDetailScreen(
+                                voucherId: voucher.id,
+                                purpose: VoucherPurpose.edit,
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                        child: const Text(
+                          'Chỉnh sửa',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -45,7 +45,7 @@ public class AdminProductService {
 
 
 
-    private AdminProductResponse mapToResponse(Product product) {
+    public AdminProductResponse mapToResponse(Product product) {
         AdminProductResponse response = new AdminProductResponse();
         response.setId(product.getId());
         response.setName(product.getName());
