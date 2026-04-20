@@ -49,13 +49,16 @@ class ProductRepository {
   }
 
   /// Create product: mock data
-  Future<ApiResponse> createProductMock(Map<String, dynamic> data) async {
-    await Future.delayed(const Duration(milliseconds: 1500));
-    
-    return ApiResponse(
-      success: true, 
-      message: "Thêm sản phẩm thành công", 
-      data: null,
+  Future<ApiResponse> createProductWithImage(
+    Map<String, dynamic> product,
+    File? image,
+  ) async {
+    final formData = FormData.fromMap({'product': product, 'image': image});
+    final response = await _apiClient.client.post(
+      '/api/admin/products',
+      data: formData,
     );
+
+    return response.data as ApiResponse;
   }
 }

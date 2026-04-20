@@ -4,7 +4,7 @@ import 'package:manager/core/network/api_response.dart';
 class ProductRepository {
   final ApiClient _apiClient = ApiClient();
 
-  Future<ApiResponse> getProducts({int page = 0, int size = 20}) async {
+  Future<ApiResponse> getProducts({int page = 0, int size = 40}) async {
     final response = await _apiClient.client.get(
       '/api/admin/products',
       queryParameters: {'page': page, 'size': size},

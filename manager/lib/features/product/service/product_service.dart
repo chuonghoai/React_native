@@ -84,15 +84,23 @@ class AdminProductService {
     }
   }
 
-  Future<bool> createProductMock(ProductModel product) async {
+  Future<bool> createProductWithImage(ProductModel product, File? image) async {
     try {
-      final requestData = _prepareRequestData(product);
-      final response = await _repository.createProductMock(requestData);
+      final Map<String, dynamic> data = {
+        'name': product.name,
+        'price': product.price.toString(),
+        'quantity': product.quantity.toString(),
+        'description': product.description ?? '',
+        'categoryId': product.category!.id.toString(),
+      };
+
+      final response = await _repository.createProductWithImage(data, image);
 
       if (response.success) {
         return true;
+      } else {
+        throw Exception(response.message ?? 'Lỗi không xác định từ server');
       }
-      throw Exception(response.message ?? 'Lỗi khi tạo sản phẩm');
     } catch (e) {
       rethrow;
     }

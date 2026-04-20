@@ -100,9 +100,13 @@ class ProductController extends ChangeNotifier {
   Future<bool> addProduct(ProductModel newModel) async {
     try {
       isLoading = true;
+      errorMessage = null;
       notifyListeners();
 
-      final success = await _productService.createProductMock(newModel);
+      final success = await _productService.createProductWithImage(
+        newModel,
+        selectedImage,
+      );
 
       if (success) {
         selectedImage = null;

@@ -46,7 +46,7 @@ public class AdminProductController {
     @GetMapping
     public ApiResponse getAllProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "40") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "desc") String order) {
         try {
