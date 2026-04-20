@@ -1,6 +1,7 @@
 // ignore_for_file: unused_import, use_super_parameters, avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:manager/features/orders/ui/orders_screen.dart';
 import 'package:manager/features/product/ui/product_edit_screen.dart';
 import 'package:manager/features/product/ui/product_screen.dart';
 import 'package:manager/shared/models/product_model.dart';
@@ -95,6 +96,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/home': (context) => const HomeScreen(),
       },
       onGenerateRoute: (settings) {
+        // Product
         if (settings.name == '/product-detail') {
           final productId = settings.arguments as int;
           return MaterialPageRoute(
@@ -105,6 +107,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           final product = settings.arguments as ProductModel;
           return MaterialPageRoute(
             builder: (_) => ProductEditScreen(product: product),
+          );
+        }
+
+        // Order
+        if (settings.name == '/orders') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          final status = args?['status'] as String? ?? 'CONFIRMED';
+
+          return MaterialPageRoute(
+            builder: (_) => OrdersScreen(initialStatus: status),
           );
         }
         return null;
