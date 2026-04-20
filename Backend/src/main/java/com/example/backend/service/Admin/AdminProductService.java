@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import com.example.backend.dto.AdminProductRequest;
 import com.example.backend.dto.AdminProductResponse;
 import com.example.backend.dto.ApiResponse;
@@ -36,6 +39,10 @@ public class AdminProductService {
 
     @Autowired
     private ReviewRepository reviewRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
 
     private AdminProductResponse mapToResponse(Product product) {
@@ -83,6 +90,31 @@ public class AdminProductService {
         return ApiResponse.success("Tạo sản phẩm thành công", mapToResponse(savedProduct));
     }
 
+    public ApiResponse createProductWithImage(String productJson, MultipartFile image) throws IOException {
+        AdminProductRequest request = objectMapper.readValue(productJson, AdminProductRequest.class);
+        
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = handleSaveImage(image);
+            request.setImageUrl(imageUrl);
+        }
+        
+        return createProduct(request);
+    }
+
+    private String handleSaveImage(MultipartFile image) throws IOException {
+        String uploadDir = "uploads/";
+        File dir = new File(uploadDir);
+        if (!dir.exists())
+            dir.mkdirs();
+
+        String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir + fileName);
+        Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        return "/uploads/" + fileName;
+    }
+
+
     public ApiResponse getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
@@ -119,16 +151,7 @@ public class AdminProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
-        String uploadDir = "uploads/";
-        File dir = new File(uploadDir);
-        if (!dir.exists())
-            dir.mkdirs();
-
-        String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-        Path filePath = Paths.get(uploadDir + fileName);
-        Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        String imageUrl = "/uploads/" + fileName;
+        String imageUrl = handleSaveImage(image);
         product.setImageUrl(imageUrl);
         productRepository.save(product);
 

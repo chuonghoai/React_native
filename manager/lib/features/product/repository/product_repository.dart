@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -48,12 +49,26 @@ class ProductRepository {
     return response.data as ApiResponse;
   }
 
-  /// Create product: mock data
   Future<ApiResponse> createProductWithImage(
     Map<String, dynamic> product,
     File? image,
   ) async {
-    final formData = FormData.fromMap({'product': product, 'image': image});
+    final Map<String, dynamic> formDataMap = {
+      'product': MultipartFile.fromString(
+        jsonEncode(product),
+        contentType: DioMediaType.parse('application/json'),
+      ),
+    };
+
+    if (image != null) {
+      formDataMap['image'] = await MultipartFile.fromFile(
+        image.path,
+        filename: image.path.split('/').last,
+      );
+    }
+
+    final formData = FormData.fromMap(formDataMap);
+
     final response = await _apiClient.client.post(
       '/api/admin/products',
       data: formData,

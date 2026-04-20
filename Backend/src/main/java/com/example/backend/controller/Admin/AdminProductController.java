@@ -75,6 +75,13 @@ public class AdminProductController {
         return adminProductService.createProduct(request);
     }
 
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ApiResponse createProductWithImage(
+            @RequestPart("product") String productJson,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+        return adminProductService.createProductWithImage(productJson, image);
+    }
+
     @GetMapping("/{id}")
     public ApiResponse getProductDetail(@PathVariable Long id) {
         return adminProductService.getProductById(id);
