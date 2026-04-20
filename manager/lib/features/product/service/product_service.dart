@@ -83,4 +83,18 @@ class AdminProductService {
       rethrow;
     }
   }
+
+  Future<bool> createProductMock(ProductModel product) async {
+    try {
+      final requestData = _prepareRequestData(product);
+      final response = await _repository.createProductMock(requestData);
+
+      if (response.success) {
+        return true;
+      }
+      throw Exception(response.message ?? 'Lỗi khi tạo sản phẩm');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

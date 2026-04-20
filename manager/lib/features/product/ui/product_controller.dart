@@ -18,6 +18,13 @@ class ProductController extends ChangeNotifier {
 
   final ImagePicker _picker = ImagePicker();
 
+  void resetState() {
+    selectedImage = null;
+    errorMessage = null;
+    currentProduct = null;
+    notifyListeners();
+  }
+
   Future<void> fetchProductDetail(int id) async {
     try {
       isLoading = true;
@@ -81,6 +88,26 @@ class ProductController extends ChangeNotifier {
       currentProduct = result;
       selectedImage = null;
       return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> addProduct(ProductModel newModel) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final success = await _productService.createProductMock(newModel);
+
+      if (success) {
+        selectedImage = null;
+      }
+      return success;
     } catch (e) {
       errorMessage = e.toString();
       return false;

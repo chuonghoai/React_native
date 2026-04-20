@@ -47,4 +47,15 @@ class ProductRepository {
     final response = await _apiClient.client.delete('/api/admin/products/$id');
     return response.data as ApiResponse;
   }
+
+  /// Create product: mock data
+  Future<ApiResponse> createProductMock(Map<String, dynamic> data) async {
+    await Future.delayed(const Duration(milliseconds: 1500));
+    
+    return ApiResponse(
+      success: true, 
+      message: "Thêm sản phẩm thành công", 
+      data: null,
+    );
+  }
 }

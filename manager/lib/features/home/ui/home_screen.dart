@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:manager/core/utils/image_url_helper.dart';
 import 'package:manager/features/home/ui/home_controller.dart';
+import 'package:manager/features/home/ui/widget/add_product_bubble.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -73,6 +74,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         backgroundColor: Colors.blueAccent,
         elevation: 0,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: AddProductBubble(
+        onProductAdded: () {
+          _controller.loadDashboardData();
+        },
       ),
       body: ListenableBuilder(
         listenable: _controller,
