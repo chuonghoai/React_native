@@ -276,7 +276,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             _buildRowInfo(
               Icons.phone_outlined,
               'SĐT:',
-              order.phoneNumber ?? 'N/A',
+              order.shippingPhone ?? 'N/A',
             ),
             _buildRowInfo(
               Icons.payment,
@@ -311,7 +311,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () => _controller.confirmOrder(order.id),
+                  onPressed: () async {
+                    final success = await _controller.updateOrderStatus(
+                      order.id,
+                      'CONFIRMED',
+                    );
+                    if (success && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Đã xác nhận đơn hàng thành công!'),
+                        ),
+                      );
+                    }
+                  },
                   icon: const Icon(
                     Icons.check_circle_outline,
                     color: Colors.white,
@@ -338,8 +350,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO:
+                  onPressed: () async {
+                    final success = await _controller.updateOrderStatus(
+                      order.id,
+                      'CANCELLED',
+                    );
+                    if (success && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Đã hủy đơn hàng theo yêu cầu!'),
+                        ),
+                      );
+                    }
                   },
                   icon: const Icon(Icons.cancel_outlined, color: Colors.red),
                   style: OutlinedButton.styleFrom(

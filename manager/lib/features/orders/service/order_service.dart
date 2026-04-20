@@ -18,4 +18,15 @@ class OrderService {
       rethrow;
     }
   }
+
+  Future<void> updateOrderStatus(int orderId, String newStatus) async {
+    try {
+      final response = await _repository.updateOrderStatus(orderId, newStatus);
+      if (!response.success) {
+        throw Exception(response.message ?? 'Không thể cập nhật trạng thái');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

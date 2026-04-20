@@ -5,7 +5,7 @@ class OrderModel {
   final String? paymentMethod;
   final String? orderDate;
   final String? shippingAddress;
-  final String? phoneNumber;
+  final String? shippingPhone;
 
   OrderModel({
     required this.id,
@@ -14,7 +14,7 @@ class OrderModel {
     this.paymentMethod,
     this.orderDate,
     this.shippingAddress,
-    this.phoneNumber,
+    this.shippingPhone,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -25,7 +25,7 @@ class OrderModel {
       paymentMethod: json['paymentMethod'],
       orderDate: json['orderDate'],
       shippingAddress: json['shippingAddress'],
-      phoneNumber: json['phoneNumber'],
+      shippingPhone: json['shippingPhone'],
     );
   }
 }

@@ -49,7 +49,22 @@ class OrdersController extends ChangeNotifier {
     }
   }
 
-  Future<void> confirmOrder(int orderId) async {
-    // TODO:
+  Future<bool> updateOrderStatus(int orderId, String newStatus) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      await _orderService.updateOrderStatus(orderId, newStatus);
+
+      await fetchOrders();
+      return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 }

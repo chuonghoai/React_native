@@ -8,4 +8,12 @@ class OrderRepository {
     final response = await _apiClient.client.get('/api/admin/orders/$status');
     return response.data as ApiResponse;
   }
+
+  Future<ApiResponse> updateOrderStatus(int orderId, String newStatus) async {
+    final response = await _apiClient.client.patch(
+      '/api/admin/orders/$orderId/status',
+      data: {'status': newStatus},
+    );
+    return response.data as ApiResponse;
+  }
 }
