@@ -1,4 +1,4 @@
-// ignore_for_file: use_super_parameters
+// ignore_for_file: use_super_parameters, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -47,6 +47,27 @@ class _OrdersScreenState extends State<OrdersScreen> {
     }
   }
 
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'NEW':
+        return Colors.orange;
+      case 'CONFIRMED':
+        return Colors.blue;
+      case 'PREPARING':
+        return Colors.purple;
+      case 'SHIPPING':
+        return Colors.cyan;
+      case 'DELIVERED':
+        return Colors.green;
+      case 'CANCELLED':
+        return Colors.grey;
+      case 'REQUEST_CANCEL':
+        return Colors.red;
+      default:
+        return Colors.blueGrey;
+    }
+  }
+
   String _formatCurrency(double amount) {
     return NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(amount);
   }
@@ -65,7 +86,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(title: const Text('Danh sách đơn hàng'), elevation: 0),
+      appBar: AppBar(
+        title: const Text(
+          'Danh sách đơn hàng',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 1,
+      ),
       body: Column(
         children: [
           _buildStatusSlider(),
@@ -79,15 +108,43 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
                 if (_controller.errorMessage != null) {
                   return Center(
-                    child: Text(
-                      _controller.errorMessage!,
-                      style: const TextStyle(color: Colors.red),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Lỗi: ${_controller.errorMessage}',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                        ElevatedButton(
+                          onPressed: _controller.fetchOrders,
+                          child: const Text('Thử lại'),
+                        ),
+                      ],
                     ),
                   );
                 }
 
                 if (_controller.orders.isEmpty) {
-                  return const Center(child: Text('Không có đơn hàng nào.'));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.inbox_outlined,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Không có đơn hàng nào.',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
                 return RefreshIndicator(
@@ -123,6 +180,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
             listenable: _controller,
             builder: (context, _) {
               final isSelected = _controller.currentStatus == status;
+              final statusColor = status == 'ALL'
+                  ? Colors.blue
+                  : _getStatusColor(status);
+
               return GestureDetector(
                 onTap: () => _controller.changeStatus(status),
                 child: Container(
@@ -130,7 +191,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: isSelected ? Colors.blue : Colors.transparent,
+                        color: isSelected ? statusColor : Colors.transparent,
                         width: 3,
                       ),
                     ),
@@ -141,8 +202,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     style: TextStyle(
                       fontWeight: isSelected
                           ? FontWeight.bold
-                          : FontWeight.normal,
-                      color: isSelected ? Colors.blue : Colors.grey[700],
+                          : FontWeight.w500,
+                      color: isSelected ? statusColor : Colors.grey[600],
                     ),
                   ),
                 ),
@@ -155,9 +216,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Widget _buildOrderItem(OrderModel order) {
+    final statusColor = _getStatusColor(order.status);
+
     return Card(
+      color: statusColor.withOpacity(0.05),
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: statusColor.withOpacity(0.15), width: 1),
+      ),
+      elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -175,17 +243,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                    horizontal: 10,
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: statusColor.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: statusColor.withOpacity(0.3)),
                   ),
                   child: Text(
                     _translateStatus(order.status),
-                    style: const TextStyle(
-                      color: Colors.blue,
+                    style: TextStyle(
+                      color: statusColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -220,32 +289,70 @@ class _OrdersScreenState extends State<OrdersScreen> {
               children: [
                 const Text(
                   'Tổng tiền:',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 Text(
                   _formatCurrency(order.totalPrice),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.red,
+                    color: Colors.redAccent,
                   ),
                 ),
               ],
             ),
 
-            // Nút Xác nhận chỉ hiện cho đơn hàng NEW
             if (order.status == 'NEW') ...[
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: () => _controller.confirmOrder(order.id),
+                  icon: const Icon(
+                    Icons.check_circle_outline,
+                    color: Colors.white,
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
                   ),
-                  child: const Text(
+                  label: const Text(
                     'Xác nhận đơn hàng',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ] else if (order.status == 'REQUEST_CANCEL') ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    // TODO:
+                  },
+                  icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                    backgroundColor: Colors.white.withOpacity(0.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  label: const Text(
+                    'Xử lý yêu cầu hủy',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -258,17 +365,27 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Widget _buildRowInfo(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6.0),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: Colors.grey[600]),
+          Icon(icon, size: 18, color: Colors.grey[500]),
           const SizedBox(width: 8),
-          Text('$label ', style: TextStyle(color: Colors.grey[700])),
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+            ),
+          ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+                color: Colors.black87,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
