@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:manager/features/home/service/product_service.dart';
 import 'package:manager/features/voucher/ui/enum/voucher_purpose.dart';
 import 'voucher_controller.dart';
 import '../repository/dto/voucher_request.dart';
@@ -21,9 +22,11 @@ class VoucherDetailScreen extends StatefulWidget {
 class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
   late VoucherPurpose _currentPurpose;
   final VoucherController _controller = VoucherController();
+  final ProductService _productService = ProductService();
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+  final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 7));
   List<ProductModel> _appliedProducts = [];
@@ -115,8 +118,25 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
                 ),
 
                 const Divider(height: 40),
-                _buildSectionTitle(
-                  'Sản phẩm áp dụng (${_appliedProducts.length})',
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildSectionTitle(
+                      'Sản phẩm áp dụng (${_appliedProducts.length})',
+                    ),
+                    if (!isReadOnly)
+                      TextButton.icon(
+                        onPressed: _showProductSelectionBottomSheet,
+                        icon: const Icon(
+                          Icons.add_circle_outline,
+                          color: Colors.orangeAccent,
+                        ),
+                        label: const Text(
+                          'Chọn sản phẩm',
+                          style: TextStyle(color: Colors.orangeAccent),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 12),
 
@@ -223,6 +243,120 @@ class _VoucherDetailScreenState extends State<VoucherDetailScreen> {
               )
             : null,
       ),
+    );
+  }
+
+  void _showProductSelectionBottomSheet() async {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return FutureBuilder<List<ProductModel>>(
+          future: _productService.getProducts(page: 0, size: 50),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 300,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (snapshot.hasError) {
+              return const SizedBox(
+                height: 300,
+                child: Center(child: Text('Lỗi khi tải sản phẩm')),
+              );
+            }
+
+            final allProducts = snapshot.data ?? [];
+
+            return StatefulBuilder(
+              builder: (context, setModalState) {
+                return Container(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Chọn sản phẩm áp dụng',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Divider(),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: allProducts.length,
+                          itemBuilder: (context, index) {
+                            final product = allProducts[index];
+                            final isSelected = _appliedProducts.any(
+                              (p) => p.id == product.id,
+                            );
+
+                            return CheckboxListTile(
+                              secondary: CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                  product.imageUrl ?? '',
+                                ),
+                                onBackgroundImageError: (_, __) =>
+                                    const Icon(Icons.image),
+                              ),
+                              title: Text(
+                                product.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              subtitle: Text(
+                                currencyFormat.format(product.price),
+                              ),
+                              value: isSelected,
+                              activeColor: Colors.orangeAccent,
+                              onChanged: (val) {
+                                setModalState(() {
+                                  if (val == true) {
+                                    _appliedProducts.add(product);
+                                  } else {
+                                    _appliedProducts.removeWhere(
+                                      (p) => p.id == product.id,
+                                    );
+                                  }
+                                });
+                                setState(() {});
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orangeAccent,
+                            ),
+                            child: const Text(
+                              'XÁC NHẬN',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 
