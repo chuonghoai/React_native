@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.OrderDetailResponse;
+import com.example.backend.dto.OrderItemResponse;
 import com.example.backend.dto.OrderResponse;
 import com.example.backend.entities.Order;
 import com.example.backend.enums.OrderStatus;
@@ -97,5 +99,45 @@ public class AdminOrderService {
         }
 
         return true;
+    }
+
+    public ApiResponse getOrderDetail(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với ID: " + orderId));
+
+        return ApiResponse.success("Lấy chi tiết đơn hàng thành công", mapToOrderDetailResponse(order));
+    }
+
+    private OrderDetailResponse mapToOrderDetailResponse(Order order) {
+        OrderDetailResponse detail = new OrderDetailResponse();
+        detail.setId(order.getId());
+        detail.setTotalPrice(order.getTotalPrice());
+        detail.setStatus(order.getStatus());
+        detail.setPaymentMethod(order.getPaymentMethod());
+        detail.setOrderDate(order.getOrderDate());
+        detail.setShippingAddress(order.getShippingAddress());
+        detail.setShippingPhone(order.getShippingPhone());
+
+        if (order.getUser() != null) {
+            detail.setBuyerName(order.getUser().getFullname());
+            detail.setBuyerEmail(order.getUser().getEmail());
+        }
+
+        List<OrderItemResponse> itemResponses = order.getOrderItems().stream().map(item -> {
+            OrderItemResponse ir = new OrderItemResponse();
+            ir.setId(item.getId());
+            ir.setPrice(item.getPrice());
+            ir.setQuantity(item.getQuantity());
+            if (item.getProduct() != null) {
+                ir.setId(item.getProduct().getId());
+                ir.setProductName(item.getProduct().getName());
+                ir.setProductImageUrl(item.getProduct().getImageUrl());
+            }
+            return ir;
+        }).collect(Collectors.toList());
+
+        detail.setItems(itemResponses);
+
+        return detail;
     }
 }

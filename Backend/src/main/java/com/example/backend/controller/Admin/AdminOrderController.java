@@ -27,6 +27,11 @@ public class AdminOrderController {
         return adminOrderService.getOrdersByStatus(status);
     }
 
+    @GetMapping("/detail/{orderId}")
+    public ApiResponse getOrderDetail(@PathVariable Long orderId) {
+        return adminOrderService.getOrderDetail(orderId);
+    }
+
     @PatchMapping("/{orderId}/status")
     public ApiResponse updateOrderStatus(
             @PathVariable Long orderId,

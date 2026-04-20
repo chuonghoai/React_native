@@ -17,4 +17,6 @@ public class OrderItemResponse {
     private Double price;
     private Product product;
     private ReviewDto review;
+    private String productName;
+    private String productImageUrl;
 }
