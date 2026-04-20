@@ -129,7 +129,6 @@ public class AdminOrderService {
             ir.setPrice(item.getPrice());
             ir.setQuantity(item.getQuantity());
             if (item.getProduct() != null) {
-                ir.setId(item.getProduct().getId());
                 ir.setProductName(item.getProduct().getName());
                 ir.setProductImageUrl(item.getProduct().getImageUrl());
             }

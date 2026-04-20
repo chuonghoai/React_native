@@ -16,4 +16,11 @@ class OrderRepository {
     );
     return response.data as ApiResponse;
   }
+
+  Future<ApiResponse> getOrderDetail(int orderId) async {
+    final response = await _apiClient.client.get(
+      '/api/admin/orders/detail/$orderId',
+    );
+    return response.data as ApiResponse;
+  }
 }

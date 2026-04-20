@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:manager/features/orders/models/order_detail_model.dart';
 import 'package:manager/features/orders/models/order_model.dart';
 import 'package:manager/features/orders/service/order_service.dart';
 
@@ -8,6 +9,7 @@ class OrdersController extends ChangeNotifier {
   bool isLoading = true;
   String? errorMessage;
   List<OrderModel> orders = [];
+  OrderDetailModel? orderDetail;
 
   final List<String> statuses = [
     'ALL',
@@ -43,6 +45,22 @@ class OrdersController extends ChangeNotifier {
     } catch (e) {
       errorMessage = e.toString();
       orders = [];
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getOrderDetail(int orderId) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      orderDetail = await _orderService.getOrderDetail(orderId);
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+      rethrow;
     } finally {
       isLoading = false;
       notifyListeners();
