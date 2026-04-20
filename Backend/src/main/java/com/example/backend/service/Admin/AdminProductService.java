@@ -14,10 +14,16 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.backend.dto.AdminProductRequest;
 import com.example.backend.dto.AdminProductResponse;
 import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.ReviewResponse;
 import com.example.backend.entities.Category;
 import com.example.backend.entities.Product;
 import com.example.backend.repositories.CategoryRepository;
 import com.example.backend.repositories.ProductRepository;
+import com.example.backend.repositories.ReviewRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 public class AdminProductService {
@@ -27,6 +33,10 @@ public class AdminProductService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
 
     private AdminProductResponse mapToResponse(Product product) {
         AdminProductResponse response = new AdminProductResponse();
@@ -38,6 +48,19 @@ public class AdminProductService {
         response.setQuantity(product.getQuantity());
         response.setSoldCount(product.getSoldCount());
         response.setCategory(product.getCategory());
+        List<ReviewResponse> reviews = reviewRepository.findByProductIdOrderByCreatedAtDesc(product.getId())
+                .stream()
+                .map(review -> ReviewResponse.builder()
+                        .id(review.getId())
+                        .fullname(review.getUser() != null ? review.getUser().getFullname() : "Anonymous")
+                        .avatarUrl(review.getUser() != null ? review.getUser().getAvatarUrl() : null)
+                        .rating(review.getRating())
+                        .comment(review.getComment())
+                        .createdAt(review.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+        response.setReviews(reviews);
+
         return response;
     }
 

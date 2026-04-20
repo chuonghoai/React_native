@@ -1,5 +1,7 @@
 package com.example.backend.dto;
 
+import java.util.List;
+
 import com.example.backend.entities.Category;
 
 import lombok.AllArgsConstructor;
@@ -20,4 +22,5 @@ public class AdminProductResponse {
     private Long quantity;
     private Long soldCount;
     private Category category;
+    private List<ReviewResponse> reviews;
 }

@@ -32,7 +32,6 @@ import com.example.backend.entities.Product;
 import com.example.backend.entities.Voucher;
 import com.example.backend.repositories.ProductRepository;
 import com.example.backend.service.Admin.AdminProductService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/admin/products")
