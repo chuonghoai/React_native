@@ -4,13 +4,17 @@ import java.security.Principal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 
 @Service
 public class WebSocketSessionService {
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketSessionService.class);
 
@@ -22,5 +26,13 @@ public class WebSocketSessionService {
 
         logger.info("WebSocket connected: user {} is now online", username);
         System.out.println("WebSocket connected: user " + username + " is now online");
+    }
+
+    public void sendMessageToUser(String usernameOrEmail, String destination, Object message) {
+        messagingTemplate.convertAndSendToUser(usernameOrEmail, destination, message);
+    }
+
+    public void broadcastMessage(String destination, Object message) {
+        messagingTemplate.convertAndSend(destination, message);
     }
 }
