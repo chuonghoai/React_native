@@ -12,6 +12,8 @@ import com.example.backend.entities.Order;
 import com.example.backend.enums.OrderStatus;
 import com.example.backend.repositories.OrderRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class AdminOrderService {
 
@@ -49,5 +51,51 @@ public class AdminOrderService {
                 .collect(Collectors.toList());
 
         return ApiResponse.success("Lấy danh sách đơn hàng thành công", responseList);
+    }
+
+    @Transactional
+    public ApiResponse updateOrderStatus(Long orderId, String newStatusStr) {
+        try {
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với ID: " + orderId));
+
+            OrderStatus newStatus = OrderStatus.valueOf(newStatusStr.toUpperCase());
+
+            if (!isValidStatusTransition(order.getStatus(), newStatus)) {
+                return ApiResponse.error("Không thể chuyển trạng thái từ " + order.getStatus() + " sang " + newStatus);
+            }
+
+            order.setStatus(newStatus);
+            orderRepository.save(order);
+
+            return ApiResponse.success("Cập nhật trạng thái đơn hàng thành công", null);
+
+        } catch (IllegalArgumentException e) {
+            return ApiResponse.error("Trạng thái đơn hàng không hợp lệ: " + newStatusStr);
+        } catch (RuntimeException e) {
+            return ApiResponse.error(e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.error("Có lỗi xảy ra khi cập nhật trạng thái đơn hàng: " + e.getMessage());
+        }
+    }
+
+    private boolean isValidStatusTransition(OrderStatus currentStatus, OrderStatus newStatus) {
+        if (currentStatus == newStatus)
+            return true;
+
+        if (currentStatus == OrderStatus.DELIVERED || currentStatus == OrderStatus.CANCELLED) {
+            return false;
+        }
+
+        if (currentStatus == OrderStatus.NEW) {
+            return newStatus == OrderStatus.CONFIRMED || newStatus == OrderStatus.CANCELLED;
+        }
+
+        if (currentStatus == OrderStatus.REQUEST_CANCEL) {
+            return newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.CONFIRMED
+                    || newStatus == OrderStatus.PREPARING || newStatus == OrderStatus.SHIPPING;
+        }
+
+        return true;
     }
 }
