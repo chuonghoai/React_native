@@ -100,8 +100,10 @@ class HomeController extends ChangeNotifier {
   void incrementNewOrdersCount({bool isIncrease = true}) {
     if (isIncrease) {
       newOrdersBadge += 1;
+      orderStats['NEW'] = newOrdersBadge;
     } else {
       newOrdersBadge -= 1;
+      orderStats['NEW'] = newOrdersBadge;
     }
     notifyListeners();
   }
