@@ -1,6 +1,7 @@
 // ignore_for_file: use_super_parameters
 
 import 'package:flutter/material.dart';
+import 'package:manager/features/category/ui/category_screen.dart';
 
 class FeatureOptions extends StatelessWidget {
   const FeatureOptions({Key? key}) : super(key: key);
@@ -35,8 +36,11 @@ class FeatureOptions extends StatelessWidget {
             leading: const Icon(Icons.category, color: Colors.blueAccent),
             title: const Text('Danh mục', style: TextStyle(fontSize: 16)),
             onTap: () {
-              // TODO:
               Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CategoryScreen()),
+              );
             },
           ),
           ListTile(
