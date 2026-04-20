@@ -1,6 +1,7 @@
 // ignore_for_file: unused_import, use_super_parameters, avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:manager/features/orders/ui/order_detail_screen.dart';
 import 'package:manager/features/orders/ui/orders_screen.dart';
 import 'package:manager/features/product/ui/product_edit_screen.dart';
 import 'package:manager/features/product/ui/product_screen.dart';
@@ -117,6 +118,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
           return MaterialPageRoute(
             builder: (_) => OrdersScreen(initialStatus: status),
+          );
+        }
+        if (settings.name == '/order-detail') {
+          final orderId = settings.arguments as int;
+          return MaterialPageRoute(
+            builder: (_) => OrderDetailScreen(orderId: orderId),
           );
         }
         return null;

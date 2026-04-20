@@ -218,168 +218,173 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget _buildOrderItem(OrderModel order) {
     final statusColor = _getStatusColor(order.status);
 
-    return Card(
-      color: statusColor.withOpacity(0.05),
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: statusColor.withOpacity(0.15), width: 1),
-      ),
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Đơn hàng #${order.id}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: statusColor.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    _translateStatus(order.status),
-                    style: TextStyle(
-                      color: statusColor,
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/order-detail', arguments: order.id);
+      },
+      child: Card(
+        color: statusColor.withOpacity(0.05),
+        margin: const EdgeInsets.only(bottom: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: statusColor.withOpacity(0.15), width: 1),
+        ),
+        elevation: 0,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Đơn hàng #${order.id}',
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-            _buildRowInfo(
-              Icons.calendar_today,
-              'Ngày đặt:',
-              _formatDate(order.orderDate),
-            ),
-            _buildRowInfo(
-              Icons.location_on_outlined,
-              'Địa chỉ:',
-              order.shippingAddress ?? 'N/A',
-            ),
-            _buildRowInfo(
-              Icons.phone_outlined,
-              'SĐT:',
-              order.shippingPhone ?? 'N/A',
-            ),
-            _buildRowInfo(
-              Icons.payment,
-              'Thanh toán:',
-              order.paymentMethod ?? 'COD',
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Tổng tiền:',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  _formatCurrency(order.totalPrice),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.redAccent,
-                  ),
-                ),
-              ],
-            ),
-
-            if (order.status == 'NEW') ...[
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final success = await _controller.updateOrderStatus(
-                      order.id,
-                      'CONFIRMED',
-                    );
-                    if (success && mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Đã xác nhận đơn hàng thành công!'),
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(
-                    Icons.check_circle_outline,
-                    color: Colors.white,
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 0,
-                  ),
-                  label: const Text(
-                    'Xác nhận đơn hàng',
-                    style: TextStyle(
-                      color: Colors.white,
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ),
-            ] else if (order.status == 'REQUEST_CANCEL') ...[
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    final success = await _controller.updateOrderStatus(
-                      order.id,
-                      'CANCELLED',
-                    );
-                    if (success && mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Đã hủy đơn hàng theo yêu cầu!'),
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.cancel_outlined, color: Colors.red),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: const BorderSide(color: Colors.red),
-                    backgroundColor: Colors.white.withOpacity(0.5),
-                    shape: RoundedRectangleBorder(
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: statusColor.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      _translateStatus(order.status),
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
-                  label: const Text(
-                    'Xử lý yêu cầu hủy',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                ],
+              ),
+              const Divider(height: 24),
+              _buildRowInfo(
+                Icons.calendar_today,
+                'Ngày đặt:',
+                _formatDate(order.orderDate),
+              ),
+              _buildRowInfo(
+                Icons.location_on_outlined,
+                'Địa chỉ:',
+                order.shippingAddress ?? 'N/A',
+              ),
+              _buildRowInfo(
+                Icons.phone_outlined,
+                'SĐT:',
+                order.shippingPhone ?? 'N/A',
+              ),
+              _buildRowInfo(
+                Icons.payment,
+                'Thanh toán:',
+                order.paymentMethod ?? 'COD',
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Tổng tiền:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    _formatCurrency(order.totalPrice),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.redAccent,
+                    ),
+                  ),
+                ],
+              ),
+
+              if (order.status == 'NEW') ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final success = await _controller.updateOrderStatus(
+                        order.id,
+                        'CONFIRMED',
+                      );
+                      if (success && mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Đã xác nhận đơn hàng thành công!'),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.white,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                    ),
+                    label: const Text(
+                      'Xác nhận đơn hàng',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ] else if (order.status == 'REQUEST_CANCEL') ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final success = await _controller.updateOrderStatus(
+                        order.id,
+                        'CANCELLED',
+                      );
+                      if (success && mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Đã hủy đơn hàng theo yêu cầu!'),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                      backgroundColor: Colors.white.withOpacity(0.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    label: const Text(
+                      'Xử lý yêu cầu hủy',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
