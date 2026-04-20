@@ -103,7 +103,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  Text('Email: ${order.buyerName ?? 'N/A'}'),
+                                  Text('Email: ${order.buyerEmail ?? 'N/A'}'),
                                   Text(
                                     'Số điện thoại: ${order.shippingPhone ?? 'N/A'}',
                                   ),

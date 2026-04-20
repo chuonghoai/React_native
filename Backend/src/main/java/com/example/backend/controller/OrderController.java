@@ -25,11 +25,9 @@ public class OrderController {
     public ApiResponse createOrder(@RequestBody OrderRequest request) {
         try {
             ApiResponse response = orderService.createOrder(request);
-            webSocketSessionService.sendMessageToUser(
-                "admin@gmail.com", 
-                "/queue/admin/new-orders", 
-                1
-            );
+            if (response.isSuccess()) {
+                webSocketSessionService.broadcastMessage("/topic/admin/new-orders", 1);
+            }
             return response;
         } catch (Exception e) {
             return ApiResponse.error("Lỗi đặt hàng: " + e.getMessage());

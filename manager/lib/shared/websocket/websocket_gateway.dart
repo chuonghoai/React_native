@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 import '../../core/storage/local_storage.dart';
 import '../../core/network/api_client.dart';
+import '../../features/home/ui/home_controller.dart';
 
 class WebsocketGateway {
   // Singleton pattern
@@ -49,12 +50,16 @@ class WebsocketGateway {
   void _registerGlobalListeners() {
     if (stompClient == null) return;
 
-    // stompClient!.subscribe(
-    //   destination: '/topic/bidding',
-    //   callback: (frame) {
-    //     print('Tin nhắn từ hệ thống: ${frame.body}');
-    //   },
-    // );
+    stompClient!.subscribe(
+      destination: '/topic/admin/new-orders',
+      callback: (StompFrame frame) {
+        if (frame.body != null) {
+          print('WebSocket Event: Có đơn hàng mới! Data: ${frame.body}');
+          
+          homeControllerInstance.incrementNewOrdersCount();
+        }
+      },
+    );
   }
 
   /// Helper: Check user online

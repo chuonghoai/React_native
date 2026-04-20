@@ -4,7 +4,12 @@ import 'package:manager/features/home/service/dashboard_service.dart';
 import 'package:manager/features/home/service/product_service.dart';
 import 'package:manager/shared/models/product_model.dart';
 
+final HomeController homeControllerInstance = HomeController._singleton();
+
 class HomeController extends ChangeNotifier {
+  HomeController._singleton();
+  HomeController();
+
   final DashboardService _dashboardService = DashboardService();
   final ProductService _productService = ProductService();
   final CategoryService _categoryService = CategoryService();
@@ -19,6 +24,7 @@ class HomeController extends ChangeNotifier {
   Map<String, int> orderStats = {};
   double currentMonthRevenue = 0.0;
   int totalUsers = 0;
+  int newOrdersBadge = 0;
 
   List<CategoryModel> categories = [];
   List<ProductModel> recentProducts = [];
@@ -47,6 +53,7 @@ class HomeController extends ChangeNotifier {
       ]);
 
       orderStats = results[0] as Map<String, int>;
+      newOrdersBadge = orderStats['NEW'] ?? 0;
       currentMonthRevenue = results[1] as double;
       totalUsers = results[2] as int;
       categories = results[3] as List<CategoryModel>;
@@ -88,5 +95,14 @@ class HomeController extends ChangeNotifier {
       isFetchingMore = false;
       notifyListeners();
     }
+  }
+
+  void incrementNewOrdersCount({bool isIncrease = true}) {
+    if (isIncrease) {
+      newOrdersBadge += 1;
+    } else {
+      newOrdersBadge -= 1;
+    }
+    notifyListeners();
   }
 }

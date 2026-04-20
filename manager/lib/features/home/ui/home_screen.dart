@@ -14,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-  final HomeController _controller = HomeController();
+  final HomeController _controller = homeControllerInstance;
 
   @override
   void initState() {
@@ -105,6 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
               controller: _scrollController,
               slivers: [
                 SliverToBoxAdapter(child: _buildTopStatsBoard()),
+                if (_controller.newOrdersBadge > 0)
+                  SliverToBoxAdapter(child: _buildNewOrderAlert()),
                 SliverToBoxAdapter(child: _buildOrderStats()),
                 SliverToBoxAdapter(child: _buildCategorySlider()),
                 if (_controller.lowStockProducts.isNotEmpty)
@@ -266,7 +268,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.grey.shade200),
-                    // Thêm chút shadow khi click
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -513,6 +514,74 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         }, childCount: _controller.recentProducts.length),
+      ),
+    );
+  }
+
+  // Widget new orders
+  Widget _buildNewOrderAlert() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/orders',
+          arguments: {'status': 'NEW'},
+        ).then((_) {
+          _controller.loadDashboardData();
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.orange.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.orange.shade300, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.orange.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.notifications_active,
+              color: Colors.deepOrange,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Bạn có đơn hàng mới!',
+                    style: TextStyle(
+                      color: Colors.deepOrange,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    'Vừa nhận thêm ${_controller.newOrdersBadge} đơn hàng chờ xác nhận.',
+                    style: TextStyle(
+                      color: Colors.orange.shade800,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.deepOrange,
+              size: 16,
+            ),
+          ],
+        ),
       ),
     );
   }
