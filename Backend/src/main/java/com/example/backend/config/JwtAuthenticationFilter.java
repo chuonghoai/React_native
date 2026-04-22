@@ -17,10 +17,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.Collections;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import com.example.backend.repositories.UserRepository;
+import com.example.backend.entities.User;
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired private JwtUtil jwtUtil;
+    @Autowired private UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -45,8 +51,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            java.util.List<org.springframework.security.core.GrantedAuthority> authorities = new ArrayList<>();
+            try {
+                Long userId = Long.parseLong(username);
+                User user = userRepository.findById(userId).orElse(null);
+                if (user != null && user.getRole() != null) {
+                    authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().toUpperCase()));
+                }
+            } catch (Exception e) {
+                // Ignore parsing errors
+            }
+
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    username, null, new ArrayList<>());
+                    username, null, authorities);
             
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             

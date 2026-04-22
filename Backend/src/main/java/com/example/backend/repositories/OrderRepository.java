@@ -30,4 +30,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "FROM Order o WHERE o.user.id = :userId " +
            "GROUP BY o.status")
     List<CashFlowStat> getCashFlowStatistics(@Param("userId") Long userId);
+
+    @Query("SELECT o.status, COUNT(o) FROM Order o GROUP BY o.status")
+    List<Object[]> countOrdersByStatus();
+
+    @Query("SELECT SUM(o.totalPrice) FROM Order o WHERE o.status = 'DELIVERED' AND MONTH(o.orderDate) = :month AND YEAR(o.orderDate) = :year")
+    Double calculateRevenueByMonth(@Param("month") int month, @Param("year") int year);
+
+    List<Order> findByStatusOrderByOrderDateDesc(OrderStatus status);
+
+    List<Order> findAllByOrderByOrderDateDesc();
 }

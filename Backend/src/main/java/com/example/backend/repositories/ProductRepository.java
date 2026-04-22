@@ -49,4 +49,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Object[]> findDiscountedProductsSortedByPriceDesc(LocalDateTime now, Pageable pageable);
 
     List<Product> findTop10ByCategoryIdAndIdNot(Long categoryId, Long productId);
+
+    @Query("SELECT p FROM Product p WHERE p.quantity <= :threshold ORDER BY p.quantity ASC")
+    List<Product> findLowStockProducts(@Param("threshold") Long threshold);
 }
